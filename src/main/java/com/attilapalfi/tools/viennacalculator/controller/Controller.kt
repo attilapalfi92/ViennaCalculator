@@ -86,8 +86,6 @@ class Controller {
         titledPane.maxWidth = Double.MAX_VALUE
         titledPane.maxHeight = Double.MAX_VALUE
 
-
-        //        fundContainer.add(titledPane)
         titledPane.addTo(fundContainer)
 
         val vBox = VBox()
@@ -104,7 +102,6 @@ class Controller {
         hBox.add(paymentStart)
         hBox.add(paymentEnd)
 
-        //        vBox.add(hBox)
         hBox.addTo(vBox)
     }
 }

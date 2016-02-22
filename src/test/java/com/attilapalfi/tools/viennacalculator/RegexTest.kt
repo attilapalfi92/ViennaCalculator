@@ -1,3 +1,5 @@
+package com.attilapalfi.tools.viennacalculator
+
 import org.junit.Test
 
 /**
