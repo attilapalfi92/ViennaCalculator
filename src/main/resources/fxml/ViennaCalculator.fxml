@@ -1,59 +1,104 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?scenebuilder-classpath-element C:/dev/projects/ViennaCalculator/target/classes/com/attilapalfi/tools/viennacalculator/view/NumberTextField.class?>
+
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<VBox xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.attilapalfi.tools.viennacalculator.controller.Controller"
-      alignment="center" minWidth="820" maxWidth="1.7976931348623157E308" spacing="10">
+<VBox alignment="center" maxWidth="1.7976931348623157E308" spacing="10" xmlns="http://javafx.com/javafx/null"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.attilapalfi.tools.viennacalculator.controller.Controller">
     <padding>
-        <Insets top="20" bottom="20" left="10" right="10"/>
+        <Insets bottom="20" left="10" right="10" top="20"/>
     </padding>
 
     <HBox maxWidth="1.7976931348623157E308" spacing="5">
-        <Button fx:id="loadHistoricalDataBtn" onAction="#onLoadHistoricalData" text="Historikus adatok tallózása"/>
+        <Button onAction="#onLoadHistoricalData" text="Historikus adatok tallózása"/>
         <ProgressBar fx:id="loadProgressBar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
                      progress="0" HBox.hgrow="ALWAYS"/>
     </HBox>
 
-    <GridPane hgap="10" vgap="10">
-        <VBox spacing="5" GridPane.columnIndex="0">
+    <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="10" VBox.vgrow="ALWAYS">
 
-            <TitledPane collapsible="false" minWidth="300" text="Kötelező havidíj" GridPane.columnIndex="0"
-                        GridPane.rowIndex="2">
+        <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="10">
+            <TitledPane collapsible="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        text="Kötelező havidíj">
                 <content>
-                    <GridPane alignment="center" hgap="10" vgap="5">
-                        <HBox spacing="5" GridPane.columnIndex="0">
-                            <DatePicker promptText="Befizetés kezdete"/>
-                            <DatePicker promptText="Befizetés vége"/>
+                    <VBox alignment="CENTER_LEFT" spacing="5">
+                        <HBox spacing="5">
+                            <DatePicker promptText="Befizetés kezdete" fx:id="mandatoryFeeStartDate"/>
+                            <DatePicker promptText="Befizetés vége" fx:id="mandatoryFeeEndDate"/>
                         </HBox>
-                        <TextField promptText="Havi befizetés" GridPane.rowIndex="1"/>
-                        <Label text="Eszközalap választás" GridPane.rowIndex="2"/>
-                        <ChoiceBox fx:id="mandatoryFeeAssetFundChoiceBox" GridPane.rowIndex="3"/>
-                        <CheckBox text="Automatikus árfolyamfigyelés" GridPane.rowIndex="4"/>
-
-                    </GridPane>
+                        <TextField promptText="Havi befizetés" fx:id="mandatoryPaymentText" />
+                        <Label text="Eszközalap választás" />
+                        <ChoiceBox fx:id="mandatoryFeeAssetFundChoiceBox" />
+                        <CheckBox text="Automatikus árfolyamfigyelés" fx:id="mandatoryPaymentRateMonitoringCheckBox"/>
+                    </VBox>
                 </content>
             </TitledPane>
+            <DatePicker promptText="Visszavásárlás időpontja"/>
 
-            <DatePicker promptText="Visszavásárlás időpontja" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+            <VBox>
+                <Label text="Összes befizetés" />
+                <TextField />
+            </VBox>
+            <VBox>
+                <Label text="Végén kivett pénz" />
+                <TextField />
+            </VBox>
+            <VBox>
+                <Label text="Különbözet" />
+                <TextField />
+            </VBox>
+            <VBox>
+                <Label text="Teljes hozam" />
+                <TextField />
+            </VBox>
+            <VBox>
+                <Label text="Visszavásárlási díj" />
+                <TextField />
+            </VBox>
+
         </VBox>
 
 
-        <TitledPane collapsible="false" minWidth="500" text="Eseti számla" GridPane.columnIndex="1"
-                    GridPane.halignment="LEFT" GridPane.valignment="TOP">
+        <TitledPane collapsible="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                    text="Eseti számla" HBox.hgrow="ALWAYS">
             <content>
-                <ScrollPane>
+                <VBox spacing="5">
+                    <Button onAction="#onAddNewFund" text="Eszközalap hozzáadás"/>
+                    <ScrollPane hbarPolicy="AS_NEEDED" vbarPolicy="ALWAYS">
+                        <VBox fx:id="fundContainer" VBox.vgrow="ALWAYS" spacing="10" maxWidth="1.7976931348623157E308"
+                              maxHeight="1.7976931348623157E308">
 
-                </ScrollPane>
+                            <TitledPane text="Eszközalap" collapsible="false" maxWidth="1.7976931348623157E308"
+                                        maxHeight="1.7976931348623157E308">
+                                <content>
+                                    <VBox maxWidth="1.7976931348623157E308"
+                                          maxHeight="1.7976931348623157E308" spacing="10">
+                                        <HBox spacing="5">
+                                            <DatePicker promptText="Befizetés kezdete" fx:id="caseByCasePaymentStartDate" />
+                                            <DatePicker promptText="Befizetés vége" fx:id="caseByCasePaymentStopDate"/>
+                                        </HBox>
+                                        <TextField promptText="Havi befizetés" fx:id="caseByCasePaymentText"/>
+                                        <Label text="Eszközalap választás"/>
+                                        <ChoiceBox fx:id="caseByCaseAssetFundChoiceBox" />
+                                        <GridPane hgap="5" maxWidth="1.7976931348623157E308"
+                                                  maxHeight="1.7976931348623157E308" vgap="5"
+                                                  VBox.vgrow="ALWAYS">
+                                            <CheckBox text="Automatikus árfolyamfigyelés" fx:id="caseByCasePaymentRateMonitoringCheckBox" GridPane.columnIndex="0"/>
+                                        </GridPane>
+                                    </VBox>
+                                </content>
+                            </TitledPane>
+
+                        </VBox>
+                    </ScrollPane>
+                </VBox>
             </content>
         </TitledPane>
 
 
-    </GridPane>
+    </HBox>
 
 </VBox>
-
-
-

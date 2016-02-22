@@ -12,7 +12,8 @@ import sun.plugin.dom.exception.InvalidStateException
 import java.io.File
 import java.io.FileInputStream
 import java.text.NumberFormat
-import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 /**
@@ -21,7 +22,7 @@ import java.util.*
 class XlsLoaderTask(private val sourceFile: File) : Task<AssetFoundHolder>() {
 
     private val safeAssetFundName = "Pénzpiaci forint"
-    private val dateFormatter = SimpleDateFormat("yyyy.MM.dd")
+    private val dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
     private val numberFormatter = NumberFormat.getInstance(Locale.FRANCE)
 
     private val assetFunds: MutableList<AssetFund> = ArrayList()
@@ -71,15 +72,15 @@ class XlsLoaderTask(private val sourceFile: File) : Task<AssetFoundHolder>() {
                 .drop(2)
                 .requireNoNulls()
                 .mapTo(valueHistory, {
-                    ValueEntry(parseToEpoch(it.getCell(0).stringCellValue),
-                            parseToDouble(it.getCell(1).stringCellValue))
+                    ValueEntry(stringToDate(it.getCell(0).stringCellValue),
+                            stringToDouble(it.getCell(1).stringCellValue))
                 })
         return valueHistory
     }
 
-    private fun parseToEpoch(stringDate: String): Long =
-            dateFormatter.parse(stringDate).time
+    private fun stringToDate(stringDate: String): LocalDate =
+            LocalDate.parse(stringDate, dateFormatter)
 
-    private fun parseToDouble(stringDouble: String): Double =
+    private fun stringToDouble(stringDouble: String): Double =
             numberFormatter.parse(stringDouble).toDouble()
 }
