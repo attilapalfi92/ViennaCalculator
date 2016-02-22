@@ -5,11 +5,7 @@ import com.attilapalfi.tools.viennacalculator.logic.AbstractAssetFundWorker
 import com.attilapalfi.tools.viennacalculator.logic.AssetFundCalculator
 import com.attilapalfi.tools.viennacalculator.logic.AssetFundCalculatorImpl
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
-import com.attilapalfi.tools.viennacalculator.model.Inpayment
-import com.attilapalfi.tools.viennacalculator.model.InvestmentOutcome
-import com.attilapalfi.tools.viennacalculator.model.ValueEntry
 import java.time.LocalDate
-import java.util.*
 
 /**
  * Created by palfi on 2016-02-21.

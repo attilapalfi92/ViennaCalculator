@@ -56,6 +56,7 @@ class AssetFundCalculatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund,
 
     override fun clear() {
         moneyInSafeAsset = false
+        today = payStartDate
         inpayments.clear()
     }
 
@@ -137,71 +138,7 @@ class AssetFundCalculatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund,
     }
 
     private fun buyback(): InvestmentOutcome {
-        val twoPercentBorderDay = today.minusYears(1)
-        val onePercentBorderDay = today.minusYears(2)
-
-        var totalInpayedForints: Int = 0
-        var totalForintsTookOut: Double = 0.0
-        var totalBuybackFeeInForints: Double = 0.0
-
-        val bondPrice: Double = if (!moneyInSafeAsset) {
-            todaysValue.value
-        } else {
-            todaysSafeValue.value
-        }
-
-        inpayments.forEach { inpayDate, inpayment ->
-            totalInpayedForints += inpayment.originalForintAmount
-
-            if (buybackIsFree(inpayDate, onePercentBorderDay)) {
-                val forintsTookOut: Double = inpayment.bondAmount * bondPrice
-                totalForintsTookOut += forintsTookOut
-
-            } else if (buybackIsOnePercent(inpayDate, twoPercentBorderDay)) {
-                val forintsTookOutWithoutFee: Double = inpayment.bondAmount * bondPrice
-                val yieldWithoutBuybackFee = yieldWithoutFee(forintsTookOutWithoutFee, inpayment)
-                val yieldWithBuybackFee = yieldWithFee(yieldWithoutBuybackFee, 0.01)
-                val forintsTookOutWithFee = tookOutForintsWithFee(inpayment, yieldWithBuybackFee)
-                totalForintsTookOut += forintsTookOutWithFee
-                val buybackFeeInForints = buybackFeeInForints(forintsTookOutWithFee, forintsTookOutWithoutFee)
-                totalBuybackFeeInForints += buybackFeeInForints
-
-            } else {
-                val forintsTookOutWithoutFee: Double = inpayment.bondAmount * bondPrice
-                val yieldWithoutBuybackFee = yieldWithoutFee(forintsTookOutWithoutFee, inpayment)
-                val yieldWithBuybackFee = yieldWithFee(yieldWithoutBuybackFee, 0.02)
-                val forintsTookOutWithFee = tookOutForintsWithFee(inpayment, yieldWithBuybackFee)
-                totalForintsTookOut += forintsTookOutWithFee
-                val buybackFeeInForints = buybackFeeInForints(forintsTookOutWithFee, forintsTookOutWithoutFee)
-                totalBuybackFeeInForints += buybackFeeInForints
-            }
-        }
-
-        val totalMarginInForints = totalForintsTookOut - totalInpayedForints
-        val totalYieldWithBuybackFee = (totalForintsTookOut / totalInpayedForints) - 1.0
-        val totalYieldWithoutBuybackFee = ((totalForintsTookOut + totalBuybackFeeInForints) / totalInpayedForints) - 1.0
-
-        return InvestmentOutcome(totalInpayedForints, totalForintsTookOut.toInt(), totalMarginInForints.toInt(),
-                totalYieldWithoutBuybackFee, totalYieldWithBuybackFee, totalBuybackFeeInForints.toInt())
+        val buybackCalculator = BuybackCalculator(inpayments, buybackDate, todaysValue, todaysSafeValue, moneyInSafeAsset)
+        return buybackCalculator.getInvestmentOutcome()
     }
-
-    private fun yieldWithoutFee(forintsTookOutWithoutFee: Double, inpayment: Inpayment): Double {
-        val marginInForintsWithoutFee = forintsTookOutWithoutFee - inpayment.originalForintAmount
-        val yieldWithoutBuybackFee = marginInForintsWithoutFee / inpayment.originalForintAmount
-        return yieldWithoutBuybackFee
-    }
-
-    private fun yieldWithFee(yieldWithoutBuybackFee: Double, fee: Double): Double = yieldWithoutBuybackFee - fee
-
-    private fun tookOutForintsWithFee(inpayment: Inpayment, yieldWithBuybackFee: Double): Double
-            = (yieldWithBuybackFee + 1.0) * inpayment.originalForintAmount
-
-    private fun buybackFeeInForints(forintsTookOutWithFee: Double, forintsTookOutWithoutFee: Double): Double
-            = forintsTookOutWithoutFee - forintsTookOutWithFee
-
-    private fun buybackIsFree(inpayDate: LocalDate, onePercentBorderDay: LocalDate): Boolean
-            = inpayDate.minusYears(2) < onePercentBorderDay
-
-    private fun buybackIsOnePercent(inpayDate: LocalDate, twoPercentBorderDay: LocalDate): Boolean
-            = inpayDate.minusYears(1) < twoPercentBorderDay
 }
