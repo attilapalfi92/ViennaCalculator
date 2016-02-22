@@ -1,7 +1,9 @@
 package com.attilapalfi.tools.viennacalculator.logic.validation
 
+import com.attilapalfi.tools.viennacalculator.exception.InvalidAssetFundException
 import com.attilapalfi.tools.viennacalculator.logic.AbstractAssetFundWorker
 import com.attilapalfi.tools.viennacalculator.logic.AssetFundCalculator
+import com.attilapalfi.tools.viennacalculator.logic.validation.AssetFundCalculatorImpl
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
 import sun.plugin.dom.exception.InvalidStateException
 import java.time.LocalDate
@@ -9,24 +11,24 @@ import java.time.LocalDate
 /**
  * Created by palfi on 2016-02-21.
  */
-class InputValidator(assetFund: AssetFund, safeAssetFund: AssetFund,
-                     payStartDate: LocalDate, payEndDate: LocalDate,
-                     buybackDate: LocalDate) :
+class AssetFundValidatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund,
+                             payStartDate: LocalDate, payEndDate: LocalDate,
+                             buybackDate: LocalDate) : AssetFundValidator,
         AbstractAssetFundWorker(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate) {
 
     private var lastValidationResult: ValidationResult = ValidationResult.UNVALIDATED
 
-    fun getYieldCalculator(): AssetFundCalculator {
+    override fun getValidAssetFundCalculator(): AssetFundCalculator {
         if (lastValidationResult == ValidationResult.UNVALIDATED) {
             validate()
         }
         if (lastValidationResult != ValidationResult.VALID) {
-            throw InvalidStateException(lastValidationResult.name)
+            throw InvalidAssetFundException(lastValidationResult)
         }
-        return AssetFundCalculator(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate)
+        return AssetFundCalculatorImpl(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate)
     }
 
-    fun validate(): ValidationResult {
+    override fun validate(): ValidationResult {
         lastValidationResult = validateDatesToEachOther()
         if (lastValidationResult != ValidationResult.VALID) {
             return lastValidationResult
