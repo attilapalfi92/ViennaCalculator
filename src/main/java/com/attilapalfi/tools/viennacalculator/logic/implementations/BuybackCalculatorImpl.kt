@@ -53,10 +53,10 @@ class BuybackCalculatorImpl(private val inpayments: TreeMap<LocalDate, Inpayment
     private fun processInpayment(inpayDate: LocalDate, inpayment: Inpayment) {
         totalInpayedForints += inpayment.originalForintAmount
 
-        if (buybackIsFree(inpayDate, onePercentBorderDay)) {
+        if (buybackIsFree(inpayDate)) {
             calculateWithoutFee(inpayment)
 
-        } else if (buybackIsOnePercent(inpayDate, twoPercentBorderDay)) {
+        } else if (buybackIsOnePercent(inpayDate)) {
             calculateWithBuybackFee(inpayment, 0.01)
 
         } else {
@@ -64,16 +64,16 @@ class BuybackCalculatorImpl(private val inpayments: TreeMap<LocalDate, Inpayment
         }
     }
 
-    private fun buybackIsFree(inpayDate: LocalDate, onePercentBorderDay: LocalDate): Boolean
-            = inpayDate.minusYears(2) < onePercentBorderDay
+    private fun buybackIsFree(inpayDate: LocalDate): Boolean
+            = inpayDate < onePercentBorderDay
 
     private fun calculateWithoutFee(inpayment: Inpayment) {
         val forintsTookOut: Double = inpayment.bondAmount * bondPrice
         totalForintsTookOut += forintsTookOut
     }
 
-    private fun buybackIsOnePercent(inpayDate: LocalDate, twoPercentBorderDay: LocalDate): Boolean
-            = inpayDate.minusYears(1) < twoPercentBorderDay
+    private fun buybackIsOnePercent(inpayDate: LocalDate): Boolean
+            = inpayDate < twoPercentBorderDay
 
     private fun calculateWithBuybackFee(inpayment: Inpayment, fee: Double) {
         forintsTookOutWithoutFee = inpayment.bondAmount * bondPrice

@@ -5,7 +5,6 @@ import com.attilapalfi.tools.viennacalculator.logic.AssetFundCalculator
 import com.attilapalfi.tools.viennacalculator.logic.BuybackCalculator
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
 import com.attilapalfi.tools.viennacalculator.model.Inpayment
-import com.attilapalfi.tools.viennacalculator.model.InvestmentOutcome
 import com.attilapalfi.tools.viennacalculator.model.ValueEntry
 import java.time.LocalDate
 import java.util.*
@@ -27,10 +26,10 @@ class AssetFundCalculatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund,
     private val inpayments = TreeMap<LocalDate, Inpayment>()
 
     private val trimmedAssetFund: List<ValueEntry>
-            by lazy { assetFund.valueHistory.filter { it.date >= payStartDate || it.date <= buybackDate }.sorted() }
+            by lazy { assetFund.valueHistory.filter { it.date >= payStartDate && it.date <= buybackDate }.sorted() }
 
     private val trimmedSafeAssetFund: List<ValueEntry>
-            by lazy { safeAssetFund.valueHistory.filter { it.date >= payStartDate || it.date <= buybackDate }.sorted() }
+            by lazy { safeAssetFund.valueHistory.filter { it.date >= payStartDate && it.date <= buybackDate }.sorted() }
 
     private lateinit var todaysValue: ValueEntry
     private lateinit var todaysSafeValue: ValueEntry
