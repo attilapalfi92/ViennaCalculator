@@ -10,5 +10,4 @@ data class ValueEntry(val date: LocalDate, val value: Double) : Comparable<Value
     override fun compareTo(other: ValueEntry): Int {
         return date.compareTo(other.date)
     }
-
 }

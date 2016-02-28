@@ -14,30 +14,24 @@ import java.util.*
 /**
  * Created by palfi on 2016-02-22.
  */
-class LogicTest {
-
-    private val assetFundName = "test asset fund"
-    private val safeAssetFundName = "safe test asset fund"
-
-    private lateinit var assetFundCalculator: AssetFundCalculator
-
-    val startDate = LocalDate.of(2000, 1, 1)
-    val endDate = LocalDate.of(2015, 12, 31)
-
-    val payStartDate = LocalDate.of(2000, 1, 1)
-    val payEndDate = LocalDate.of(2005, 1, 1)
-    val buybackDate = LocalDate.of(2005, 1, 1)
+class VisualizedTest : AbstractLogicTest() {
 
     var diagramThread1: Thread = Thread()
     var diagramThread2: Thread = Thread()
+
+    override val startDate = LocalDate.of(2000, 1, 1)
+    override val endDate = LocalDate.of(2015, 12, 31)
+
+    override val payStartDate = LocalDate.of(2000, 1, 1)
+    override val payEndDate = LocalDate.of(2005, 1, 1)
+    override val buybackDate = LocalDate.of(2005, 1, 1)
 
     @Before
     fun setup() {
         val holder = getAssetFundHolder()
         assetFundCalculator = AssetFundValidatorImpl(holder.assetFunds.first(),
-                holder.safeAssetFund, payStartDate, payEndDate, buybackDate).getValidAssetFundCalculator()
+                holder.safeAssetFund, payStartDate, payEndDate, buybackDate, true).getValidAssetFundCalculator()
     }
-
 
     @Test
     fun testAssetFundCalculator() {
@@ -46,7 +40,6 @@ class LogicTest {
         diagramThread1.join()
         diagramThread2.join()
     }
-
 
     @Test
     fun testBuybackCalculator() {

@@ -16,6 +16,7 @@
         <Button onAction="#onLoadHistoricalData" text="Historikus adatok tallózása"/>
         <ProgressBar fx:id="loadProgressBar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
                      progress="0" HBox.hgrow="ALWAYS"/>
+        <Button text="Árfolyamtörténet megtekintése"/>
     </HBox>
 
     <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="10" VBox.vgrow="ALWAYS">
@@ -29,35 +30,47 @@
                             <DatePicker promptText="Befizetés kezdete" fx:id="mandatoryFeeStartDate"/>
                             <DatePicker promptText="Befizetés vége" fx:id="mandatoryFeeEndDate"/>
                         </HBox>
-                        <TextField promptText="Havi befizetés" fx:id="mandatoryPaymentText" />
-                        <Label text="Eszközalap választás" />
-                        <ChoiceBox fx:id="mandatoryFeeAssetFundChoiceBox" />
+                        <TextField promptText="Havi befizetés" fx:id="mandatoryPaymentText"/>
+                        <Label text="Eszközalap választás"/>
+                        <ChoiceBox fx:id="mandatoryFeeAssetFundChoiceBox"/>
                         <CheckBox text="Automatikus árfolyamfigyelés" fx:id="mandatoryPaymentRateMonitoringCheckBox"/>
+                        <Button text="Egyedi eredmények megtekintése" disable="true"/>
                     </VBox>
                 </content>
             </TitledPane>
-            <DatePicker promptText="Visszavásárlás időpontja"/>
+            <HBox spacing="5">
+                <DatePicker promptText="Visszavásárlás időpontja"/>
+                <Button text="Szimuláció"/>
+            </HBox>
 
-            <VBox>
-                <Label text="Összes befizetés" />
-                <TextField />
-            </VBox>
-            <VBox>
-                <Label text="Végén kivett pénz" />
-                <TextField />
-            </VBox>
-            <VBox>
-                <Label text="Különbözet" />
-                <TextField />
-            </VBox>
-            <VBox>
-                <Label text="Teljes hozam" />
-                <TextField />
-            </VBox>
-            <VBox>
-                <Label text="Visszavásárlási díj" />
-                <TextField />
-            </VBox>
+            <TitledPane collapsible="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        text="Összegzés">
+                <content>
+                    <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="10">
+                        <VBox>
+                            <Label text="Összes befizetés"/>
+                            <TextField disable="true"/>
+                        </VBox>
+                        <VBox>
+                            <Label text="Végén kivett pénz"/>
+                            <TextField disable="true"/>
+                        </VBox>
+                        <VBox>
+                            <Label text="Különbözet"/>
+                            <TextField disable="true"/>
+                        </VBox>
+                        <VBox>
+                            <Label text="Teljes hozam"/>
+                            <TextField disable="true"/>
+                        </VBox>
+                        <VBox>
+                            <Label text="Visszavásárlási díj"/>
+                            <TextField disable="true"/>
+                        </VBox>
+                    </VBox>
+                </content>
+            </TitledPane>
+
 
         </VBox>
 
@@ -75,19 +88,18 @@
                                         maxHeight="1.7976931348623157E308">
                                 <content>
                                     <VBox maxWidth="1.7976931348623157E308"
-                                          maxHeight="1.7976931348623157E308" spacing="10">
+                                          maxHeight="1.7976931348623157E308" spacing="5">
                                         <HBox spacing="5">
-                                            <DatePicker promptText="Befizetés kezdete" fx:id="caseByCasePaymentStartDate" />
+                                            <DatePicker promptText="Befizetés kezdete"
+                                                        fx:id="caseByCasePaymentStartDate"/>
                                             <DatePicker promptText="Befizetés vége" fx:id="caseByCasePaymentStopDate"/>
                                         </HBox>
                                         <TextField promptText="Havi befizetés" fx:id="caseByCasePaymentText"/>
                                         <Label text="Eszközalap választás"/>
-                                        <ChoiceBox fx:id="caseByCaseAssetFundChoiceBox" />
-                                        <GridPane hgap="5" maxWidth="1.7976931348623157E308"
-                                                  maxHeight="1.7976931348623157E308" vgap="5"
-                                                  VBox.vgrow="ALWAYS">
-                                            <CheckBox text="Automatikus árfolyamfigyelés" fx:id="caseByCasePaymentRateMonitoringCheckBox" GridPane.columnIndex="0"/>
-                                        </GridPane>
+                                        <ChoiceBox fx:id="caseByCaseAssetFundChoiceBox"/>
+                                        <CheckBox text="Automatikus árfolyamfigyelés"
+                                                  fx:id="caseByCasePaymentRateMonitoringCheckBox" />
+                                        <Button text="Egyedi eredmények megtekintése" disable="true"/>
                                     </VBox>
                                 </content>
                             </TitledPane>

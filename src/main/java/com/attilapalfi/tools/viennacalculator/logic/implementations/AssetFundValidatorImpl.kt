@@ -13,8 +13,8 @@ import java.time.LocalDate
  */
 class AssetFundValidatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund,
                              payStartDate: LocalDate, payEndDate: LocalDate,
-                             buybackDate: LocalDate) : AssetFundValidator,
-        AbstractAssetFundWorker(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate) {
+                             buybackDate: LocalDate, autoPriceMonitoring: Boolean) : AssetFundValidator,
+        AbstractAssetFundWorker(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate, autoPriceMonitoring) {
 
     private var lastValidationResult: ValidationResult = ValidationResult.UNVALIDATED
 
@@ -25,7 +25,7 @@ class AssetFundValidatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund,
         if (lastValidationResult != ValidationResult.VALID) {
             throw InvalidAssetFundException(lastValidationResult)
         }
-        return AssetFundCalculatorImpl(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate)
+        return AssetFundCalculatorImpl(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate, autoPriceMonitoring)
     }
 
     override fun validate(): ValidationResult {

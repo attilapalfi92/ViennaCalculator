@@ -14,8 +14,8 @@ import java.util.*
  */
 class AssetFundCalculatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund,
                               payStartDate: LocalDate, payEndDate: LocalDate,
-                              buybackDate: LocalDate) : AssetFundCalculator,
-        AbstractAssetFundWorker(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate) {
+                              buybackDate: LocalDate, autoPriceMonitoring: Boolean) : AssetFundCalculator,
+        AbstractAssetFundWorker(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate, autoPriceMonitoring) {
 
     private val inpaymentDays: Int = if (payStartDate.dayOfMonth > 28) {
         28
@@ -31,8 +31,8 @@ class AssetFundCalculatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund,
     private val trimmedSafeAssetFund: List<ValueEntry>
             by lazy { safeAssetFund.valueHistory.filter { it.date >= payStartDate && it.date <= buybackDate }.sorted() }
 
-    private lateinit var todaysValue: ValueEntry
-    private lateinit var todaysSafeValue: ValueEntry
+    private var todaysValue: ValueEntry = ValueEntry(LocalDate.MIN, Double.MIN_VALUE)
+    private var todaysSafeValue: ValueEntry = ValueEntry(LocalDate.MIN, Double.MIN_VALUE)
     private var today: LocalDate = payStartDate
 
     override fun getResultWithMonthlyPayment(monthlyPayment: Int): BuybackCalculator {
@@ -45,10 +45,12 @@ class AssetFundCalculatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund,
     }
 
     private fun simulateDay(dayIndex: Int, monthlyPayment: Int) {
-        todaysValue = trimmedAssetFund[dayIndex]
-        todaysSafeValue = trimmedSafeAssetFund[dayIndex]
         today = today.plusDays(1)
-        moveFundsIfNeeded()
+        todaysValue = trimmedAssetFund[dayIndex]
+        if (autoPriceMonitoring) {
+            todaysSafeValue = trimmedSafeAssetFund[dayIndex]
+            moveFundsIfNeeded()
+        }
         doInpaymentIfNeeded(monthlyPayment)
     }
 
@@ -91,10 +93,10 @@ class AssetFundCalculatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund,
     }
 
     private fun rescueNeeded(): Boolean
-            = todaysValue.value < previousOneMonthAverage(todaysValue, assetFund) * 0.95
+            = todaysValue.value < previousOneMonthAverage(todaysValue) * 0.95
 
     private fun canMoveUpFunds(): Boolean
-            = todaysValue.value > previousOneMonthAverage(todaysValue, assetFund) * 1.05
+            = todaysValue.value > previousOneMonthAverage(todaysValue) * 1.05
 
     private fun rescueFunds() {
         inpayments.forEach { inpayDate, inpayment ->
@@ -126,8 +128,8 @@ class AssetFundCalculatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund,
         }
     }
 
-    private fun previousOneMonthAverage(todayValue: ValueEntry, checkedAssetFund: AssetFund): Double {
-        val endIndex = checkedAssetFund.valueHistory.indexOf(todayValue)
+    private fun previousOneMonthAverage(todayValue: ValueEntry): Double {
+        val endIndex = assetFund.valueHistory.indexOf(todayValue)
         val startIndex = if (endIndex - 30 < 0) {
             0
         } else {
