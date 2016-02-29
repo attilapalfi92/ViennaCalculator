@@ -40,7 +40,7 @@
             </TitledPane>
             <HBox spacing="5">
                 <DatePicker promptText="Visszavásárlás időpontja"/>
-                <Button text="Szimuláció"/>
+                <Button text="Szimuláció" onAction="#onSimulation"/>
             </HBox>
 
             <TitledPane collapsible="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
@@ -92,7 +92,7 @@
                                         <HBox spacing="5">
                                             <DatePicker promptText="Befizetés kezdete"
                                                         fx:id="caseByCasePaymentStartDate"/>
-                                            <DatePicker promptText="Befizetés vége" fx:id="caseByCasePaymentStopDate"/>
+                                            <DatePicker promptText="Befizetés vége" fx:id="caseByCasePaymentEndDate"/>
                                         </HBox>
                                         <TextField promptText="Havi befizetés" fx:id="caseByCasePaymentText"/>
                                         <Label text="Eszközalap választás"/>

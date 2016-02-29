@@ -25,7 +25,6 @@ class FundViewBuilder(val fundContainer: VBox)  {
         addCheckBox(vBox)
         addResultsButton(vBox)
         addRemoveButton(vBox)
-
         return fundViewHolder
     }
 
