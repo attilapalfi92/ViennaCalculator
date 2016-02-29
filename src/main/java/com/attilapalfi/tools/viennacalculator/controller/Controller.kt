@@ -6,12 +6,9 @@ import com.attilapalfi.tools.viennacalculator.model.AssetFund
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.control.*
-import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.FileChooser
 import javafx.stage.Stage
-import tornadofx.add
-import tornadofx.addTo
 import java.util.concurrent.Executors
 
 class Controller {
@@ -80,59 +77,7 @@ class Controller {
 
     @FXML
     private fun onAddNewFund(event: ActionEvent) {
-        val titledPane = getTitledPane()
-        val vBox = getVBox(titledPane)
-        addHBoxToVBox(vBox)
-
-        val textField = TextField()
-        textField.promptText = "Havi befizetés"
-        vBox.add(textField)
-
-        val label = Label("Eszközalap választás")
-        vBox.add(label)
-
-        val choiceBox = ChoiceBox<AssetFund>()
-        vBox.add(choiceBox)
-
-        val checkBox = CheckBox("Automatikus árfolyamfigyelés")
-        vBox.add(checkBox)
-
-        val resultsButton = Button("Egyedi eredmények megtekintése")
-        resultsButton.isDisable = true
-        vBox.add(resultsButton)
-
-        val removeButton = Button("Eltávolítás")
-        vBox.add(removeButton)
-    }
-
-    private fun getTitledPane(): TitledPane {
-        val titledPane = TitledPane()
-        titledPane.text = "Eszközalap"
-        titledPane.maxWidth = Double.MAX_VALUE
-        titledPane.maxHeight = Double.MAX_VALUE
-        titledPane.addTo(fundContainer)
-        return titledPane
-    }
-
-    private fun getVBox(titledPane: TitledPane): VBox {
-        val vBox = VBox()
-        vBox.maxWidth = Double.MAX_VALUE
-        vBox.maxHeight = Double.MAX_VALUE
-        vBox.spacing = 5.0
-        titledPane.content = vBox
-        return vBox
-    }
-
-    private fun addHBoxToVBox(vBox: VBox): HBox {
-        val hBox = HBox()
-        hBox.spacing = 5.0
-        val paymentStart = DatePicker()
-        paymentStart.promptText = "Befizetés kezdete"
-        val paymentEnd = DatePicker()
-        paymentEnd.promptText = "Befizetés vége"
-        hBox.add(paymentStart)
-        hBox.add(paymentEnd)
-        hBox.addTo(vBox)
-        return hBox
+        val builder = FundViewBuilder(fundContainer)
+        val viewHolder = builder.build()
     }
 }

@@ -12,9 +12,9 @@ import java.util.*
 /**
  * Created by 212461305 on 2016.02.23..
  */
-class AssetFundCalculatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund,
-                              payStartDate: LocalDate, payEndDate: LocalDate,
-                              buybackDate: LocalDate, autoPriceMonitoring: Boolean) : AssetFundCalculator,
+class PriceMonitoringFundCalculator(assetFund: AssetFund, safeAssetFund: AssetFund,
+                                    payStartDate: LocalDate, payEndDate: LocalDate,
+                                    buybackDate: LocalDate, autoPriceMonitoring: Boolean) : AssetFundCalculator,
         AbstractAssetFundWorker(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate, autoPriceMonitoring) {
 
     private val inpaymentDays: Int = if (payStartDate.dayOfMonth > 28) {

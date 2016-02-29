@@ -25,7 +25,7 @@ class AssetFundValidatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund,
         if (lastValidationResult != ValidationResult.VALID) {
             throw InvalidAssetFundException(lastValidationResult)
         }
-        return AssetFundCalculatorImpl(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate, autoPriceMonitoring)
+        return PriceMonitoringFundCalculator(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate, autoPriceMonitoring)
     }
 
     override fun validate(): ValidationResult {
