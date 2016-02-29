@@ -17,13 +17,13 @@ class FundViewHolder(var paymentStartDate: DatePicker? = null,
                      var removeButton: Button? = null) {
 
     fun dataIsFilled(): Boolean {
-        if (paymentStartDate?.value != null
-                && paymentEndDate?.value != null
-                && !monthlyPaymentText?.text.isNullOrBlank()
-                && assetFundChoiceBox?.value != null) {
-            return true
+        if (paymentStartDate?.value == null
+                || paymentEndDate?.value == null
+                || monthlyPaymentText?.text.isNullOrBlank()
+                || assetFundChoiceBox?.value == null) {
+            return false
         }
-        return false
+        return true
     }
 
     /**
