@@ -1,8 +1,11 @@
 package com.attilapalfi.tools.viennacalculator.controller
 
 import com.attilapalfi.tools.viennacalculator.logic.XlsLoaderTask
+import com.attilapalfi.tools.viennacalculator.logic.validation.AssetFundValidator
+import com.attilapalfi.tools.viennacalculator.logic.validation.ValidationResult
 import com.attilapalfi.tools.viennacalculator.model.AssetFoundHolder
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
+import com.attilapalfi.tools.viennacalculator.model.InvestmentOutcome
 import com.attilapalfi.tools.viennacalculator.view.FundViewHolder
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
@@ -13,11 +16,15 @@ import javafx.stage.FileChooser
 import javafx.stage.Stage
 import java.net.URL
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
-class Controller : Initializable {
+class Controller : Initializable, SimulationResultHandler {
 
     var stage: Stage? = null
+
+    private val maxFundCount = 10
+    private var fundCount: Int = 1
 
     private val executor = Executors.newFixedThreadPool(2)
     private val fundViewHolders: MutableList<FundViewHolder> = ArrayList()
@@ -25,6 +32,9 @@ class Controller : Initializable {
 
     private var xlsLoaderTask: XlsLoaderTask? = null
     private var assetFundHolder: AssetFoundHolder? = null
+    @Volatile
+    private var dataIsLoaded: Boolean = false
+    private val investmentOutcomes: MutableMap<InvestmentOutcome, Int> = ConcurrentHashMap(2 * maxFundCount)
 
     @FXML
     lateinit var loadProgressBar: ProgressBar
@@ -41,6 +51,8 @@ class Controller : Initializable {
     lateinit var mandatoryFeeAssetFundChoiceBox: ChoiceBox<AssetFund>
     @FXML
     lateinit var mandatoryPaymentRateMonitoringCheckBox: CheckBox
+    @FXML
+    lateinit var buybackDatePicker: DatePicker
 
     @FXML
     lateinit var caseByCasePaymentStartDate: DatePicker
@@ -89,19 +101,84 @@ class Controller : Initializable {
             assetFundHolder?.let {
                 mandatoryFeeAssetFundChoiceBox.items.addAll(it.assetFunds)
                 mandatoryFeeAssetFundChoiceBox.selectionModel.select(0)
+                dataIsLoaded = true
             }
         }
     }
 
     @FXML
     private fun onAddNewFund(event: ActionEvent) {
-        val builder = FundViewBuilder(fundContainer)
-        val viewHolder = builder.build()
-        fundViewHolders.add(viewHolder)
+        if (fundCount < maxFundCount) {
+            val builder = FundViewBuilder(fundContainer)
+            val viewHolder = builder.build()
+            fundViewHolders.add(viewHolder)
+            fundCount++
+        }
     }
 
+    // TODO: put this logic to a new class
     @FXML
     private fun onSimulation(event: ActionEvent) {
+        if (assetFundHolder == null) {
+            // TODO: handle shit
+            return
+        } else {
+            InvestmentSimulator(maxFundCount, dataIsLoaded, buybackDatePicker, assetFundHolder as AssetFoundHolder,
+                    defaultCaseByCaseViewHolder, fundViewHolders).onSimulation(this)
+        }
 
+
+
+
+        assetFundHolder?.let {
+            if (defaultCaseByCaseViewHolder.dataIsFilled()) {
+                processFilledViewHolder(defaultCaseByCaseViewHolder, it.safeAssetFund)
+            }
+            fundViewHolders.forEach {
+                viewHolder ->
+                if (viewHolder.dataIsFilled()) {
+                    processFilledViewHolder(viewHolder, it.safeAssetFund)
+                }
+            }
+        }
+    }
+
+    private fun processFilledViewHolder(filledViewHolder: FundViewHolder, safeAssetFund: AssetFund) {
+        val assetFundData = filledViewHolder.getDataHolder()
+        val validator = assetFundData.getValidator(safeAssetFund, buybackDatePicker.value)
+        handleValidationResult(validator.validate(), validator, assetFundData.monthlyPayment)
+    }
+
+    // TODO: handle shits
+    private fun handleValidationResult(result: ValidationResult, validator: AssetFundValidator, monthlyPayment: Int) {
+        when (result) {
+            ValidationResult.VALID -> {
+                executor.submit {
+                    investmentOutcomes.put(validator.getValidAssetFundCalculator()
+                            .getResultWithMonthlyPayment(monthlyPayment).getInvestmentOutcome(), 0)
+                }
+            }
+            ValidationResult.OUT_OF_RANGE_PAY_START_DATE -> {
+
+            }
+            ValidationResult.OUT_OF_RANGE_PAY_END_DATE -> {
+
+            }
+            ValidationResult.OUT_OF_RANGE_BUYBACK_DATE -> {
+
+            }
+            ValidationResult.START_LATER_THAN_END -> {
+
+            }
+            ValidationResult.START_LATER_THAN_BUYBACK -> {
+
+            }
+            ValidationResult.END_LATER_THAN_BUYBACK -> {
+
+            }
+            ValidationResult.UNVALIDATED -> {
+
+            }
+        }
     }
 }

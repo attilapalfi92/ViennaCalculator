@@ -39,7 +39,7 @@
                 </content>
             </TitledPane>
             <HBox spacing="5">
-                <DatePicker promptText="Visszavásárlás időpontja"/>
+                <DatePicker promptText="Visszavásárlás időpontja" fx:id="buybackDatePicker"/>
                 <Button text="Szimuláció" onAction="#onSimulation"/>
             </HBox>
 

@@ -1,6 +1,7 @@
 package com.attilapalfi.tools.viennacalculator.view
 
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
+import com.attilapalfi.tools.viennacalculator.model.FundViewDataHolder
 import javafx.scene.control.*
 import sun.plugin.dom.exception.InvalidStateException
 
