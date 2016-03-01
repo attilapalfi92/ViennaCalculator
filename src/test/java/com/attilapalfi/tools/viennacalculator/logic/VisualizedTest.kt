@@ -30,12 +30,13 @@ class VisualizedTest : AbstractLogicTest() {
     fun setup() {
         val holder = getAssetFundHolder()
         assetFundCalculator = AssetFundValidatorImpl(holder.assetFunds.first(),
-                holder.safeAssetFund, payStartDate, payEndDate, buybackDate, true, customPayments).getValidAssetFundCalculator()
+                holder.safeAssetFund, payStartDate, payEndDate, buybackDate, true, 100000, emptyMap())
+                .getValidAssetFundCalculator()
     }
 
     @Test
     fun testAssetFundCalculator() {
-        val buybackCalculator = assetFundCalculator.getResultWithMonthlyPayment(100000)
+        val buybackCalculator = assetFundCalculator.getBuybackCalculator()
         Assert.assertNotNull(buybackCalculator)
         diagramThread1.join()
         diagramThread2.join()
@@ -43,7 +44,7 @@ class VisualizedTest : AbstractLogicTest() {
 
     @Test
     fun testBuybackCalculator() {
-        val buybackCalculator = assetFundCalculator.getResultWithMonthlyPayment(100000)
+        val buybackCalculator = assetFundCalculator.getBuybackCalculator()
         val investmentOutcome = buybackCalculator.getInvestmentOutcome()
         println(investmentOutcome)
         Assert.assertNotNull(investmentOutcome)

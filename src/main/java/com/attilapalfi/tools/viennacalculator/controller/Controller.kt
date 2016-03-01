@@ -27,7 +27,7 @@ class Controller : Initializable, SimulationResultHandler {
     private val maxFundCount = 10
     private var fundCount: Int = 1
 
-    private val executor = Executors.newFixedThreadPool(2)
+    private val executor = Executors.newFixedThreadPool(1)
     private val fundViewHolders: MutableList<FundViewHolder> = ArrayList()
     private lateinit var defaultCaseByCaseViewHolder: FundViewHolder
 
@@ -66,6 +66,17 @@ class Controller : Initializable, SimulationResultHandler {
     @FXML
     lateinit var caseByCasePaymentRateMonitoringCheckBox: CheckBox
 
+    @FXML
+    lateinit var totalInpaymentsText: TextField
+    @FXML
+    lateinit var totalForintsTookOutAfterFeeText: TextField
+    @FXML
+    lateinit var totalMarginInForintsAfterFeeText: TextField
+    @FXML
+    lateinit var totalYieldWithBuybackFeeText: TextField
+    @FXML
+    lateinit var totalBuybackFeeInForintsText: TextField
+
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         defaultCaseByCaseViewHolder = FundViewHolder(
                 paymentStartDate = caseByCasePaymentStartDate,
@@ -97,7 +108,7 @@ class Controller : Initializable, SimulationResultHandler {
     }
 
     private fun onLoadSucceed() {
-        xlsLoaderTask?.setOnSucceeded { event ->
+        xlsLoaderTask?.setOnSucceeded {
             assetFundHolder = xlsLoaderTask?.get()
             assetFundHolder?.let {
                 mandatoryFeeAssetFundChoiceBox.items.addAll(it.assetFunds)
@@ -117,45 +128,74 @@ class Controller : Initializable, SimulationResultHandler {
         }
     }
 
-    // TODO: put this logic to a new class
     @FXML
     private fun onSimulation(event: ActionEvent) {
+        if (dataAndInputIsInadequate()) {
+            return
+        }
+        tryToSimulate()
+    }
+
+    private fun dataAndInputIsInadequate(): Boolean {
         if (!dataIsLoaded) {
             // TODO: handle shit
-            return
+            return true
         }
         if (buybackDatePicker.value == null) {
             // TODO: handle shit
-            return
+            return true
         }
         if (assetFundHolder == null) {
             // TODO: handle shit
-            return
-        } else {
-            val assetFundHolder = assetFundHolder as AssetFoundHolder
-            val calculatorList = ArrayList<AssetFundCalculator>()
-            if (defaultCaseByCaseViewHolder.dataIsFilled()) {
-                processFilledViewHolder(defaultCaseByCaseViewHolder, assetFundHolder.safeAssetFund, calculatorList)
-            }
-            fundViewHolders.forEach {
-                viewHolder ->
-                if (viewHolder.dataIsFilled()) {
-                    processFilledViewHolder(viewHolder, assetFundHolder.safeAssetFund, calculatorList)
-                }
+            return true
+        }
+        return false
+    }
+
+    private fun tryToSimulate() {
+        val safeAssetFund = (assetFundHolder as AssetFoundHolder).safeAssetFund
+        val calculatorList = initListByDefaultFundViewHolder(safeAssetFund)
+        addOtherFundViewHolders(calculatorList, safeAssetFund)
+        val simulatorTask = InvestmentSimulatorTask(calculatorList, maxFundCount)
+        simulatorTask.setOnSucceeded { showResultOnGui(simulatorTask.get()) }
+        executor.submit(simulatorTask)
+    }
+
+    private fun showResultOnGui(investmentOutcome: InvestmentOutcome) {
+        totalInpaymentsText.text = investmentOutcome.totalInpayedForints.toString()
+        totalForintsTookOutAfterFeeText.text = investmentOutcome.totalForintsTookOutAfterFee.toString()
+        totalMarginInForintsAfterFeeText.text = investmentOutcome.totalMarginInForintsAfterFee.toString()
+        totalYieldWithBuybackFeeText.text = investmentOutcome.totalYieldWithBuybackFee.toString()
+        totalBuybackFeeInForintsText.text = investmentOutcome.totalBuybackFeeInForints.toString()
+
+    }
+
+    private fun initListByDefaultFundViewHolder(safeAssetFund: AssetFund): MutableList<AssetFundCalculator> {
+        val calculatorList = ArrayList<AssetFundCalculator>()
+        if (defaultCaseByCaseViewHolder.dataIsFilled()) {
+            validateAndCollectCalculators(defaultCaseByCaseViewHolder, safeAssetFund, calculatorList)
+        }
+        return calculatorList
+    }
+
+    private fun validateAndCollectCalculators(filledViewHolder: FundViewHolder, safeAssetFund: AssetFund,
+                                              calculatorList: MutableList<AssetFundCalculator>) {
+        val assetFundData = filledViewHolder.getDataHolder()
+        val validator = assetFundData.getValidator(safeAssetFund, buybackDatePicker.value)
+        handleValidationResult(validator, calculatorList)
+    }
+
+    private fun addOtherFundViewHolders(calculatorList: MutableList<AssetFundCalculator>, safeAssetFund: AssetFund) {
+        fundViewHolders.forEach {
+            viewHolder ->
+            if (viewHolder.dataIsFilled()) {
+                validateAndCollectCalculators(viewHolder, safeAssetFund, calculatorList)
             }
         }
     }
 
-    private fun processFilledViewHolder(filledViewHolder: FundViewHolder, safeAssetFund: AssetFund,
-                                        calculatorList: ArrayList<AssetFundCalculator>) {
-        val assetFundData = filledViewHolder.getDataHolder()
-        val validator = assetFundData.getValidator(safeAssetFund, buybackDatePicker.value)
-        handleValidationResult(validator, assetFundData.monthlyPayment, calculatorList)
-    }
-
     // TODO: handle shits
-    private fun handleValidationResult(validator: AssetFundValidator, monthlyPayment: Int,
-                                       calculatorList: ArrayList<AssetFundCalculator>) {
+    private fun handleValidationResult(validator: AssetFundValidator, calculatorList: MutableList<AssetFundCalculator>) {
         when (validator.validate()) {
             ValidationResult.VALID -> {
                 calculatorList.add(validator.getValidAssetFundCalculator())

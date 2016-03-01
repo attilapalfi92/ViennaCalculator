@@ -37,7 +37,7 @@ class PriceMonitoringFundCalculator(assetFund: AssetFund, safeAssetFund: AssetFu
     private var todaysSafeValue: ValueEntry = ValueEntry(LocalDate.MIN, Double.MIN_VALUE)
     private var today: LocalDate = payStartDate
 
-    override fun getResultWithMonthlyPayment(monthlyPayment: Int): BuybackCalculator {
+    override fun getBuybackCalculator(): BuybackCalculator {
         clear()
         doFirstInpayment(monthlyPayment)
         for (dayIndex in 1..trimmedAssetFund.size - 1) {
@@ -54,10 +54,6 @@ class PriceMonitoringFundCalculator(assetFund: AssetFund, safeAssetFund: AssetFu
             moveFundsIfNeeded()
         }
         doInpaymentIfNeeded(monthlyPayment)
-    }
-
-    override fun getResultWithCustomPayment(monthlyPayment: Int): BuybackCalculator {
-        throw UnsupportedOperationException("not implemented")
     }
 
     override fun clear() {

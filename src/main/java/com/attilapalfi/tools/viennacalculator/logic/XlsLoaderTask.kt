@@ -28,13 +28,16 @@ class XlsLoaderTask(private val sourceFile: File) : Task<AssetFoundHolder>() {
     private val assetFunds: MutableList<AssetFund> = ArrayList()
     private var safeAssetFund: AssetFund? = null
 
+    private lateinit var resultHolder: AssetFoundHolder
+
     override fun call(): AssetFoundHolder {
         val start = System.currentTimeMillis()
         doLoad()
         println(System.currentTimeMillis() - start)
         safeAssetFund?.let {
+            resultHolder = AssetFoundHolder(assetFunds, it)
             succeeded()
-            return AssetFoundHolder(assetFunds, it)
+            return resultHolder
         }
         throw InvalidStateException("safeAssetFund cannot be null. 'Pénzpiaci forint eszközalap' not found.")
     }

@@ -1,75 +1,46 @@
 package com.attilapalfi.tools.viennacalculator.controller
 
-import com.attilapalfi.tools.viennacalculator.logic.validation.AssetFundValidator
-import com.attilapalfi.tools.viennacalculator.logic.validation.ValidationResult
-import com.attilapalfi.tools.viennacalculator.model.AssetFoundHolder
-import com.attilapalfi.tools.viennacalculator.model.AssetFund
+import com.attilapalfi.tools.viennacalculator.logic.AssetFundCalculator
 import com.attilapalfi.tools.viennacalculator.model.InvestmentOutcome
-import com.attilapalfi.tools.viennacalculator.view.FundViewHolder
 import javafx.concurrent.Task
-import java.time.LocalDate
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Callable
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 /**
  * Created by palfi on 2016-03-01.
  */
-class InvestmentSimulatorTask(val maxFundCount: Int, val dataIsLoaded: Boolean, val buybackDate: LocalDate,
-                              val assetFundHolder: AssetFoundHolder, val defaultCaseByCaseViewHolder: FundViewHolder,
-                              val fundViewHolders: List<FundViewHolder>) : Task<InvestmentOutcome>() {
+class InvestmentSimulatorTask(val calculatorList: MutableList<AssetFundCalculator>,
+                              val maxFundCount: Int) : Task<InvestmentOutcome>() {
 
-    private val executor = Executors.newFixedThreadPool(maxFundCount)
-    private val investmentOutcomes: MutableMap<InvestmentOutcome, Int> = ConcurrentHashMap(2 * maxFundCount)
+    private val executor = Executors.newFixedThreadPool(maxFundCount.coerceAtMost(Runtime.getRuntime().availableProcessors()))
+    private lateinit var resultOutcome: InvestmentOutcome
 
-    override fun call(): InvestmentOutcome? {
-        if (defaultCaseByCaseViewHolder.dataIsFilled()) {
-            processFilledViewHolder(defaultCaseByCaseViewHolder, assetFundHolder.safeAssetFund)
+    override fun call(): InvestmentOutcome {
+        val futureList: List<Future<InvestmentOutcome>> = calculatorList.map {
+            executor.submit(Callable<InvestmentOutcome> {
+                it.getBuybackCalculator().getInvestmentOutcome()
+            })
         }
-        fundViewHolders.forEach {
-            viewHolder ->
-            if (viewHolder.dataIsFilled()) {
-                processFilledViewHolder(viewHolder, assetFundHolder.safeAssetFund)
-            }
-        }
-        return InvestmentOutcome(0, 0, 0, 0.0, 0.0, 0)
+        val investmentOutcomes: List<InvestmentOutcome> = futureList.map { it.get() }
+        return mergeOutcomes(investmentOutcomes)
     }
 
-    private fun processFilledViewHolder(filledViewHolder: FundViewHolder, safeAssetFund: AssetFund) {
-        val assetFundData = filledViewHolder.getDataHolder()
-        val validator = assetFundData.getValidator(safeAssetFund, buybackDate)
-        handleValidationResult(validator.validate(), validator, assetFundData.monthlyPayment)
-    }
+    private fun mergeOutcomes(outcomes: List<InvestmentOutcome>): InvestmentOutcome {
+        val totalInpayedForints = outcomes.sumBy { it.totalInpayedForints }
+        val totalMarginInForintsAfterFee = outcomes.sumBy { it.totalMarginInForintsAfterFee }
+        val totalBuybackFeeInForints = outcomes.sumBy { it.totalBuybackFeeInForints }
 
-    // TODO: handle shits
-    private fun handleValidationResult(result: ValidationResult, validator: AssetFundValidator, monthlyPayment: Int) {
-        when (result) {
-            ValidationResult.VALID -> {
-                executor.submit {
-                    investmentOutcomes.put(validator.getValidAssetFundCalculator()
-                            .getResultWithMonthlyPayment(monthlyPayment).getInvestmentOutcome(), 0)
-                }
-            }
-            ValidationResult.OUT_OF_RANGE_PAY_START_DATE -> {
-
-            }
-            ValidationResult.OUT_OF_RANGE_PAY_END_DATE -> {
-
-            }
-            ValidationResult.OUT_OF_RANGE_BUYBACK_DATE -> {
-
-            }
-            ValidationResult.START_LATER_THAN_END -> {
-
-            }
-            ValidationResult.START_LATER_THAN_BUYBACK -> {
-
-            }
-            ValidationResult.END_LATER_THAN_BUYBACK -> {
-
-            }
-            ValidationResult.UNVALIDATED -> {
-
-            }
-        }
+        resultOutcome = InvestmentOutcome(
+                totalInpayedForints = totalInpayedForints,
+                totalForintsTookOutAfterFee = outcomes.sumBy { it.totalForintsTookOutAfterFee },
+                totalMarginInForintsAfterFee = totalMarginInForintsAfterFee,
+                totalBuybackFeeInForints = totalBuybackFeeInForints,
+                totalYieldWithoutBuybackFee = (totalMarginInForintsAfterFee + totalBuybackFeeInForints)
+                        .toDouble() / totalInpayedForints,
+                totalYieldWithBuybackFee = totalMarginInForintsAfterFee.toDouble() / totalInpayedForints
+        )
+        succeeded()
+        return resultOutcome
     }
 }

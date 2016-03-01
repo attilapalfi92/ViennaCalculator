@@ -2,7 +2,6 @@ package com.attilapalfi.tools.viennacalculator.model
 
 import com.attilapalfi.tools.viennacalculator.logic.implementations.AssetFundValidatorImpl
 import com.attilapalfi.tools.viennacalculator.logic.validation.AssetFundValidator
-import com.attilapalfi.tools.viennacalculator.model.AssetFund
 import java.time.LocalDate
 
 /**
@@ -17,7 +16,8 @@ data class FundViewDataHolder(val paymentStart: LocalDate,
 
     fun getValidator(safeAssetFund: AssetFund, buybackDate: LocalDate): AssetFundValidator {
         return AssetFundValidatorImpl(
-                assetFund, safeAssetFund, paymentStart, paymentEnd, buybackDate, autoPriceMonitoring, customPayments
+                assetFund, safeAssetFund, paymentStart, paymentEnd, buybackDate,
+                autoPriceMonitoring, monthlyPayment, customPayments
         )
     }
 
