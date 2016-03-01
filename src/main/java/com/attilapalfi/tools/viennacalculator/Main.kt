@@ -22,8 +22,6 @@ class Main : Application() {
     }
 
     companion object {
-
-
         fun main(vararg args: String) {
             Application.launch(*args)
         }

@@ -1,6 +1,7 @@
 package com.attilapalfi.tools.viennacalculator.controller
 
 import com.attilapalfi.tools.viennacalculator.logic.AssetFundCalculator
+import com.attilapalfi.tools.viennacalculator.logic.InvestmentSimulatorTask
 import com.attilapalfi.tools.viennacalculator.logic.XlsLoaderTask
 import com.attilapalfi.tools.viennacalculator.logic.validation.AssetFundValidator
 import com.attilapalfi.tools.viennacalculator.logic.validation.ValidationResult
@@ -20,7 +21,7 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
-class Controller : Initializable, SimulationResultHandler {
+class Controller : Initializable {
 
     var stage: Stage? = null
 

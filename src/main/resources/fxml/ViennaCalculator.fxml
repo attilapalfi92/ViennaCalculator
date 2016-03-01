@@ -64,8 +64,8 @@
                             <TextField disable="true" fx:id="totalYieldWithBuybackFeeText"/>
                         </VBox>
                         <VBox>
-                            <Label text="Visszavásárlási díj" fx:id="totalBuybackFeeInForintsText"/>
-                            <TextField disable="true"/>
+                            <Label text="Visszavásárlási díj"/>
+                            <TextField disable="true" fx:id="totalBuybackFeeInForintsText"/>
                         </VBox>
                     </VBox>
                 </content>
@@ -98,7 +98,7 @@
                                         <Label text="Eszközalap választás"/>
                                         <ChoiceBox fx:id="caseByCaseAssetFundChoiceBox"/>
                                         <CheckBox text="Automatikus árfolyamfigyelés"
-                                                  fx:id="caseByCasePaymentRateMonitoringCheckBox" />
+                                                  fx:id="caseByCasePaymentRateMonitoringCheckBox"/>
                                         <Button text="Egyedi eredmények megtekintése" disable="true"/>
                                     </VBox>
                                 </content>

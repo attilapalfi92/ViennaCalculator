@@ -1,4 +1,4 @@
-package com.attilapalfi.tools.viennacalculator.controller
+package com.attilapalfi.tools.viennacalculator.logic
 
 import com.attilapalfi.tools.viennacalculator.logic.AssetFundCalculator
 import com.attilapalfi.tools.viennacalculator.model.InvestmentOutcome
