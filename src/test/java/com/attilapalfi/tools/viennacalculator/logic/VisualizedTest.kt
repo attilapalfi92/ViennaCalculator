@@ -30,7 +30,7 @@ class VisualizedTest : AbstractLogicTest() {
     fun setup() {
         val holder = getAssetFundHolder()
         assetFundCalculator = AssetFundValidatorImpl(holder.assetFunds.first(),
-                holder.safeAssetFund, payStartDate, payEndDate, buybackDate, true).getValidAssetFundCalculator()
+                holder.safeAssetFund, payStartDate, payEndDate, buybackDate, true, customPayments).getValidAssetFundCalculator()
     }
 
     @Test

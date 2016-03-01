@@ -6,30 +6,22 @@ import com.attilapalfi.tools.viennacalculator.model.AssetFoundHolder
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
 import com.attilapalfi.tools.viennacalculator.model.InvestmentOutcome
 import com.attilapalfi.tools.viennacalculator.view.FundViewHolder
-import javafx.scene.control.DatePicker
+import javafx.concurrent.Task
+import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
 /**
  * Created by palfi on 2016-03-01.
  */
-class InvestmentSimulator(val maxFundCount: Int, val dataIsLoaded: Boolean, val buybackDatePicker: DatePicker,
-                          val assetFundHolder: AssetFoundHolder, val defaultCaseByCaseViewHolder: FundViewHolder,
-                          val fundViewHolders: List<FundViewHolder>) {
+class InvestmentSimulatorTask(val maxFundCount: Int, val dataIsLoaded: Boolean, val buybackDate: LocalDate,
+                              val assetFundHolder: AssetFoundHolder, val defaultCaseByCaseViewHolder: FundViewHolder,
+                              val fundViewHolders: List<FundViewHolder>) : Task<InvestmentOutcome>() {
 
     private val executor = Executors.newFixedThreadPool(maxFundCount)
     private val investmentOutcomes: MutableMap<InvestmentOutcome, Int> = ConcurrentHashMap(2 * maxFundCount)
 
-    fun onSimulation(resultHandler: SimulationResultHandler) {
-        if (!dataIsLoaded) {
-            // TODO: handle shit
-            return
-        }
-        if (buybackDatePicker.value == null) {
-            // TODO: handle shit
-            return
-        }
-
+    override fun call(): InvestmentOutcome? {
         if (defaultCaseByCaseViewHolder.dataIsFilled()) {
             processFilledViewHolder(defaultCaseByCaseViewHolder, assetFundHolder.safeAssetFund)
         }
@@ -39,11 +31,12 @@ class InvestmentSimulator(val maxFundCount: Int, val dataIsLoaded: Boolean, val 
                 processFilledViewHolder(viewHolder, assetFundHolder.safeAssetFund)
             }
         }
+        return InvestmentOutcome(0, 0, 0, 0.0, 0.0, 0)
     }
 
     private fun processFilledViewHolder(filledViewHolder: FundViewHolder, safeAssetFund: AssetFund) {
         val assetFundData = filledViewHolder.getDataHolder()
-        val validator = assetFundData.getValidator(safeAssetFund, buybackDatePicker.value)
+        val validator = assetFundData.getValidator(safeAssetFund, buybackDate)
         handleValidationResult(validator.validate(), validator, assetFundData.monthlyPayment)
     }
 

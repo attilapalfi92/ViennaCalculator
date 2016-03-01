@@ -25,7 +25,7 @@ class NoAutoMonitoringTest : AbstractLogicTest() {
     fun testWithIncreasingFund() {
         val holder = getIncreasingAssetFundHolder()
         assetFundCalculator = AssetFundValidatorImpl(holder.assetFunds.first(),
-                holder.safeAssetFund, payStartDate, payEndDate, buybackDate, false).getValidAssetFundCalculator()
+                holder.safeAssetFund, payStartDate, payEndDate, buybackDate, false, customPayments).getValidAssetFundCalculator()
 
         val buybackCalculator = assetFundCalculator.getResultWithMonthlyPayment(10000)
         Assert.assertNotNull(buybackCalculator)
@@ -39,7 +39,7 @@ class NoAutoMonitoringTest : AbstractLogicTest() {
     fun testWithZeroingFund() {
         val holder = getZeroingAssetFundHolder()
         assetFundCalculator = AssetFundValidatorImpl(holder.assetFunds.first(),
-                holder.safeAssetFund, payStartDate, payEndDate, buybackDate, false).getValidAssetFundCalculator()
+                holder.safeAssetFund, payStartDate, payEndDate, buybackDate, false, customPayments).getValidAssetFundCalculator()
 
         val buybackCalculator = assetFundCalculator.getResultWithMonthlyPayment(10000)
         Assert.assertNotNull(buybackCalculator)

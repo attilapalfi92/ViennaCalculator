@@ -8,5 +8,6 @@ import java.time.LocalDate
  */
 abstract class AbstractAssetFundWorker(protected val assetFund: AssetFund, protected val safeAssetFund: AssetFund,
                                        protected val payStartDate: LocalDate, protected val payEndDate: LocalDate,
-                                       protected val buybackDate: LocalDate, protected val autoPriceMonitoring: Boolean) {
+                                       protected val buybackDate: LocalDate, protected val autoPriceMonitoring: Boolean,
+                                       protected val monthlyPayment: Int, protected val customPayments: Map<LocalDate, Int>) {
 }

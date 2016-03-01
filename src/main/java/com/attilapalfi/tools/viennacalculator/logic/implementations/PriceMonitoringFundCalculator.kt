@@ -14,8 +14,10 @@ import java.util.*
  */
 class PriceMonitoringFundCalculator(assetFund: AssetFund, safeAssetFund: AssetFund,
                                     payStartDate: LocalDate, payEndDate: LocalDate,
-                                    buybackDate: LocalDate, autoPriceMonitoring: Boolean) : AssetFundCalculator,
-        AbstractAssetFundWorker(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate, autoPriceMonitoring) {
+                                    buybackDate: LocalDate, autoPriceMonitoring: Boolean,
+                                    monthlyPayment: Int, customPayments: Map<LocalDate, Int>) : AssetFundCalculator,
+        AbstractAssetFundWorker(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate,
+                autoPriceMonitoring, monthlyPayment, customPayments) {
 
     private val inpaymentDays: Int = if (payStartDate.dayOfMonth > 28) {
         28

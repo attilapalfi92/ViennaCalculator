@@ -11,10 +11,11 @@ import java.time.LocalDate
 /**
  * Created by palfi on 2016-02-21.
  */
-class AssetFundValidatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund,
-                             payStartDate: LocalDate, payEndDate: LocalDate,
-                             buybackDate: LocalDate, autoPriceMonitoring: Boolean) : AssetFundValidator,
-        AbstractAssetFundWorker(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate, autoPriceMonitoring) {
+class AssetFundValidatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund, payStartDate: LocalDate,
+                             payEndDate: LocalDate, buybackDate: LocalDate, autoPriceMonitoring: Boolean,
+                             monthlyPayment: Int, customPayments: Map<LocalDate, Int>) : AssetFundValidator,
+        AbstractAssetFundWorker(assetFund, safeAssetFund, payStartDate, payEndDate,
+                buybackDate, autoPriceMonitoring, monthlyPayment, customPayments) {
 
     private var lastValidationResult: ValidationResult = ValidationResult.UNVALIDATED
 
@@ -25,7 +26,8 @@ class AssetFundValidatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund,
         if (lastValidationResult != ValidationResult.VALID) {
             throw InvalidAssetFundException(lastValidationResult)
         }
-        return PriceMonitoringFundCalculator(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate, autoPriceMonitoring)
+        return PriceMonitoringFundCalculator(assetFund, safeAssetFund, payStartDate, payEndDate, buybackDate,
+                autoPriceMonitoring, monthlyPayment, customPayments)
     }
 
     override fun validate(): ValidationResult {

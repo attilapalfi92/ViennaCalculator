@@ -1,5 +1,6 @@
 package com.attilapalfi.tools.viennacalculator.controller
 
+import com.attilapalfi.tools.viennacalculator.logic.AssetFundCalculator
 import com.attilapalfi.tools.viennacalculator.logic.XlsLoaderTask
 import com.attilapalfi.tools.viennacalculator.logic.validation.AssetFundValidator
 import com.attilapalfi.tools.viennacalculator.logic.validation.ValidationResult
@@ -119,44 +120,45 @@ class Controller : Initializable, SimulationResultHandler {
     // TODO: put this logic to a new class
     @FXML
     private fun onSimulation(event: ActionEvent) {
+        if (!dataIsLoaded) {
+            // TODO: handle shit
+            return
+        }
+        if (buybackDatePicker.value == null) {
+            // TODO: handle shit
+            return
+        }
         if (assetFundHolder == null) {
             // TODO: handle shit
             return
         } else {
-            InvestmentSimulator(maxFundCount, dataIsLoaded, buybackDatePicker, assetFundHolder as AssetFoundHolder,
-                    defaultCaseByCaseViewHolder, fundViewHolders).onSimulation(this)
-        }
-
-
-
-
-        assetFundHolder?.let {
+            val assetFundHolder = assetFundHolder as AssetFoundHolder
+            val calculatorList = ArrayList<AssetFundCalculator>()
             if (defaultCaseByCaseViewHolder.dataIsFilled()) {
-                processFilledViewHolder(defaultCaseByCaseViewHolder, it.safeAssetFund)
+                processFilledViewHolder(defaultCaseByCaseViewHolder, assetFundHolder.safeAssetFund, calculatorList)
             }
             fundViewHolders.forEach {
                 viewHolder ->
                 if (viewHolder.dataIsFilled()) {
-                    processFilledViewHolder(viewHolder, it.safeAssetFund)
+                    processFilledViewHolder(viewHolder, assetFundHolder.safeAssetFund, calculatorList)
                 }
             }
         }
     }
 
-    private fun processFilledViewHolder(filledViewHolder: FundViewHolder, safeAssetFund: AssetFund) {
+    private fun processFilledViewHolder(filledViewHolder: FundViewHolder, safeAssetFund: AssetFund,
+                                        calculatorList: ArrayList<AssetFundCalculator>) {
         val assetFundData = filledViewHolder.getDataHolder()
         val validator = assetFundData.getValidator(safeAssetFund, buybackDatePicker.value)
-        handleValidationResult(validator.validate(), validator, assetFundData.monthlyPayment)
+        handleValidationResult(validator, assetFundData.monthlyPayment, calculatorList)
     }
 
     // TODO: handle shits
-    private fun handleValidationResult(result: ValidationResult, validator: AssetFundValidator, monthlyPayment: Int) {
-        when (result) {
+    private fun handleValidationResult(validator: AssetFundValidator, monthlyPayment: Int,
+                                       calculatorList: ArrayList<AssetFundCalculator>) {
+        when (validator.validate()) {
             ValidationResult.VALID -> {
-                executor.submit {
-                    investmentOutcomes.put(validator.getValidAssetFundCalculator()
-                            .getResultWithMonthlyPayment(monthlyPayment).getInvestmentOutcome(), 0)
-                }
+                calculatorList.add(validator.getValidAssetFundCalculator())
             }
             ValidationResult.OUT_OF_RANGE_PAY_START_DATE -> {
 

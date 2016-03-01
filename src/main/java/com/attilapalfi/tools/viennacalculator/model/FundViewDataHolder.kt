@@ -17,7 +17,7 @@ data class FundViewDataHolder(val paymentStart: LocalDate,
 
     fun getValidator(safeAssetFund: AssetFund, buybackDate: LocalDate): AssetFundValidator {
         return AssetFundValidatorImpl(
-                assetFund, safeAssetFund, paymentStart, paymentEnd, buybackDate, autoPriceMonitoring
+                assetFund, safeAssetFund, paymentStart, paymentEnd, buybackDate, autoPriceMonitoring, customPayments
         )
     }
 
