@@ -1,27 +1,31 @@
 package com.attilapalfi.tools.viennacalculator.controller
 
+import com.attilapalfi.tools.viennacalculator.model.AssetFoundHolder
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
 import com.attilapalfi.tools.viennacalculator.view.FundViewHolder
+import com.attilapalfi.tools.viennacalculator.view.RestrictingDateCell
 import javafx.scene.control.*
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
+import javafx.util.Callback
 import tornadofx.add
 import tornadofx.addTo
 
 /**
  * Created by palfi on 2016-02-28.
  */
-class FundViewBuilder(val fundContainer: VBox)  {
+class FundViewBuilder(val fundContainer: VBox) {
 
     private val fundViewHolder = FundViewHolder()
 
-    fun build(): FundViewHolder {
+    fun build(assetFundHolder: AssetFoundHolder?): FundViewHolder {
         val titledPane = getTitledPane()
         fundContainer.add(titledPane)
         val vBox = getVBox(titledPane)
-        addHBoxToVBox(vBox)
+        val choiceBox = ChoiceBox<AssetFund>()
+        addHBoxToVBox(vBox, choiceBox)
         addMonthlyPaymentText(vBox)
-        addLabelAndChoiceBox(vBox)
+        addLabelAndChoiceBox(choiceBox, vBox, assetFundHolder)
         addCheckBox(vBox)
         addResultsButton(vBox)
         addRemoveButton(vBox)
@@ -45,24 +49,30 @@ class FundViewBuilder(val fundContainer: VBox)  {
         return vBox
     }
 
-    private fun addHBoxToVBox(vBox: VBox): HBox {
+    private fun addHBoxToVBox(vBox: VBox, choiceBox: ChoiceBox<AssetFund>): HBox {
         val hBox = HBox()
         hBox.spacing = 5.0
-        addPaymentStart(hBox)
-        addPaymentEnd(hBox)
+        addPaymentStart(hBox, choiceBox)
+        addPaymentEnd(hBox, choiceBox)
         hBox.addTo(vBox)
         return hBox
     }
 
-    private fun addPaymentStart(hBox: HBox) {
+    private fun addPaymentStart(hBox: HBox, choiceBox: ChoiceBox<AssetFund>) {
         val paymentStart = DatePicker()
+        paymentStart.dayCellFactory = Callback {
+            RestrictingDateCell(choiceBox)
+        }
         paymentStart.promptText = "Befizetés kezdete"
         fundViewHolder.paymentStartDate = paymentStart
         hBox.add(paymentStart)
     }
 
-    private fun addPaymentEnd(hBox: HBox) {
+    private fun addPaymentEnd(hBox: HBox, choiceBox: ChoiceBox<AssetFund>) {
         val paymentEnd = DatePicker()
+        paymentEnd.dayCellFactory = Callback {
+            RestrictingDateCell(choiceBox)
+        }
         paymentEnd.promptText = "Befizetés vége"
         fundViewHolder.paymentEndDate = paymentEnd
         hBox.add(paymentEnd)
@@ -75,10 +85,13 @@ class FundViewBuilder(val fundContainer: VBox)  {
         vBox.add(textField)
     }
 
-    private fun addLabelAndChoiceBox(vBox: VBox) {
+    private fun addLabelAndChoiceBox(choiceBox: ChoiceBox<AssetFund>, vBox: VBox, assetFundHolder: AssetFoundHolder?) {
         val label = Label("Eszközalap választás")
         vBox.add(label)
-        val choiceBox = ChoiceBox<AssetFund>()
+        assetFundHolder?.let {
+            choiceBox.items.addAll(it.assetFunds)
+            choiceBox.selectionModel.select(0)
+        }
         fundViewHolder.assetFundChoiceBox = choiceBox
         vBox.add(choiceBox)
     }

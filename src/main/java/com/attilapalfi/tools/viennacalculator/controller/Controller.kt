@@ -9,6 +9,7 @@ import com.attilapalfi.tools.viennacalculator.model.AssetFoundHolder
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
 import com.attilapalfi.tools.viennacalculator.model.InvestmentOutcome
 import com.attilapalfi.tools.viennacalculator.view.FundViewHolder
+import com.attilapalfi.tools.viennacalculator.view.RestrictingDateCell
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
@@ -16,6 +17,7 @@ import javafx.scene.control.*
 import javafx.scene.layout.VBox
 import javafx.stage.FileChooser
 import javafx.stage.Stage
+import javafx.util.Callback
 import java.net.URL
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -79,6 +81,18 @@ class Controller : Initializable {
     lateinit var totalBuybackFeeInForintsText: TextField
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
+        mandatoryFeeStartDate.dayCellFactory = Callback {
+            RestrictingDateCell(mandatoryFeeAssetFundChoiceBox)
+        }
+        mandatoryFeeEndDate.dayCellFactory = Callback {
+            RestrictingDateCell(mandatoryFeeAssetFundChoiceBox)
+        }
+        caseByCasePaymentStartDate.dayCellFactory = Callback {
+            RestrictingDateCell(caseByCaseAssetFundChoiceBox)
+        }
+        caseByCasePaymentEndDate.dayCellFactory = Callback {
+            RestrictingDateCell(caseByCaseAssetFundChoiceBox)
+        }
         defaultCaseByCaseViewHolder = FundViewHolder(
                 paymentStartDate = caseByCasePaymentStartDate,
                 paymentEndDate = caseByCasePaymentEndDate,
@@ -112,10 +126,20 @@ class Controller : Initializable {
         xlsLoaderTask?.setOnSucceeded {
             assetFundHolder = xlsLoaderTask?.get()
             assetFundHolder?.let {
-                mandatoryFeeAssetFundChoiceBox.items.addAll(it.assetFunds)
-                mandatoryFeeAssetFundChoiceBox.selectionModel.select(0)
+                fillChoiceBoxes(it)
                 dataIsLoaded = true
             }
+        }
+    }
+
+    private fun fillChoiceBoxes(assetFundHolder: AssetFoundHolder) {
+        mandatoryFeeAssetFundChoiceBox.items.addAll(assetFundHolder.assetFunds)
+        mandatoryFeeAssetFundChoiceBox.selectionModel.select(0)
+        caseByCaseAssetFundChoiceBox.items.addAll(assetFundHolder.assetFunds)
+        caseByCaseAssetFundChoiceBox.selectionModel.select(0)
+        fundViewHolders.forEach { holder ->
+            holder.assetFundChoiceBox?.items?.addAll(assetFundHolder.assetFunds)
+            holder.assetFundChoiceBox?.selectionModel?.select(0)
         }
     }
 
@@ -123,7 +147,7 @@ class Controller : Initializable {
     private fun onAddNewFund(event: ActionEvent) {
         if (fundCount < maxFundCount) {
             val builder = FundViewBuilder(fundContainer)
-            val viewHolder = builder.build()
+            val viewHolder = builder.build(assetFundHolder)
             fundViewHolders.add(viewHolder)
             fundCount++
         }
