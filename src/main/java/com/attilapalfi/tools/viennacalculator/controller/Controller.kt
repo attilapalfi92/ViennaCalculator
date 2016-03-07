@@ -4,6 +4,7 @@ import com.attilapalfi.tools.viennacalculator.exception.InvalidInputsException
 import com.attilapalfi.tools.viennacalculator.logic.XlsLoaderTask
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
 import com.attilapalfi.tools.viennacalculator.model.AssetFundHolder
+import com.attilapalfi.tools.viennacalculator.view.AssetFundChartView
 import com.attilapalfi.tools.viennacalculator.view.FundViewHolder
 import com.attilapalfi.tools.viennacalculator.view.RestrictingDateCell
 import com.attilapalfi.tools.viennacalculator.view.ResultSummaryViewHolder
@@ -193,7 +194,11 @@ class Controller : Initializable {
 
     @FXML
     private fun onMandatoryShowDiagramClick(event: ActionEvent) {
-
+        if ( mandatoryFeeAssetFundChoiceBox.value != null ) {
+            AssetFundChartView.show(mandatoryFeeAssetFundChoiceBox.value)
+        } else {
+            // error
+        }
     }
 
     @FXML
