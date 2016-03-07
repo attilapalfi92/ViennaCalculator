@@ -1,7 +1,7 @@
 package com.attilapalfi.tools.viennacalculator.logic
 
 import com.attilapalfi.tools.viennacalculator.logic.implementations.AssetFundValidatorImpl
-import com.attilapalfi.tools.viennacalculator.model.AssetFoundHolder
+import com.attilapalfi.tools.viennacalculator.model.AssetFundHolder
 import org.junit.Before
 import java.time.LocalDate
 

@@ -2,7 +2,7 @@ package com.attilapalfi.tools.viennacalculator.logic
 
 import com.attilapalfi.tools.viennacalculator.TestDiagramVisualizer
 import com.attilapalfi.tools.viennacalculator.logic.implementations.AssetFundValidatorImpl
-import com.attilapalfi.tools.viennacalculator.model.AssetFoundHolder
+import com.attilapalfi.tools.viennacalculator.model.AssetFundHolder
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
 import com.attilapalfi.tools.viennacalculator.model.ValueEntry
 import org.junit.Assert
@@ -53,7 +53,7 @@ class VisualizedTest : AbstractLogicTest() {
         diagramThread2.join()
     }
 
-    fun getAssetFundHolder(): AssetFoundHolder {
+    fun getAssetFundHolder(): AssetFundHolder {
         val valueHistory = TreeSet<ValueEntry>().apply { add(ValueEntry(startDate, 1.0)) }
         val safeValueHistory = TreeSet<ValueEntry>().apply { add(ValueEntry(startDate, 1.0)) }
 
@@ -62,7 +62,7 @@ class VisualizedTest : AbstractLogicTest() {
 
         val assetFund = AssetFund(assetFundName, valueHistory)
         val safeAssetFund = AssetFund(safeAssetFundName, safeValueHistory)
-        return AssetFoundHolder(listOf(assetFund), safeAssetFund)
+        return AssetFundHolder(listOf(assetFund), safeAssetFund)
     }
 
     private fun loadHistory(safeValueHistory: TreeSet<ValueEntry>, valueHistory: TreeSet<ValueEntry>) {

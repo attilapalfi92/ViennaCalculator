@@ -14,7 +14,7 @@ class FundViewHolder(var paymentStartDate: DatePicker? = null,
                      var assetFundChoiceBox: ChoiceBox<AssetFund>? = null,
                      var paymentRateMonitoringCheckBox: CheckBox? = null,
                      var customPaymentsButton: Button? = null,
-                     var individualResultsButton: Button? = null,
+                     var showDiagramButton: Button? = null,
                      var removeButton: Button? = null) {
 
     fun dataIsFilled(): Boolean {

@@ -1,15 +1,12 @@
 package com.attilapalfi.tools.viennacalculator.controller
 
-import com.attilapalfi.tools.viennacalculator.logic.AssetFundCalculator
-import com.attilapalfi.tools.viennacalculator.logic.InvestmentSimulatorTask
+import com.attilapalfi.tools.viennacalculator.exception.InvalidInputsException
 import com.attilapalfi.tools.viennacalculator.logic.XlsLoaderTask
-import com.attilapalfi.tools.viennacalculator.logic.validation.AssetFundValidator
-import com.attilapalfi.tools.viennacalculator.logic.validation.ValidationResult
-import com.attilapalfi.tools.viennacalculator.model.AssetFoundHolder
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
-import com.attilapalfi.tools.viennacalculator.model.InvestmentOutcome
+import com.attilapalfi.tools.viennacalculator.model.AssetFundHolder
 import com.attilapalfi.tools.viennacalculator.view.FundViewHolder
 import com.attilapalfi.tools.viennacalculator.view.RestrictingDateCell
+import com.attilapalfi.tools.viennacalculator.view.ResultSummaryViewHolder
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
@@ -20,7 +17,6 @@ import javafx.stage.Stage
 import javafx.util.Callback
 import java.net.URL
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
 class Controller : Initializable {
@@ -31,20 +27,20 @@ class Controller : Initializable {
     private var fundCount: Int = 1
 
     private val executor = Executors.newFixedThreadPool(1)
-    private val fundViewHolders: MutableList<FundViewHolder> = ArrayList()
-    private lateinit var defaultCaseByCaseViewHolder: FundViewHolder
+    private val addedFundViewHolders: MutableList<FundViewHolder> = ArrayList()
 
     private var xlsLoaderTask: XlsLoaderTask? = null
-    private var assetFundHolder: AssetFoundHolder? = null
+    private var assetFundHolder: AssetFundHolder? = null
     @Volatile
     private var dataIsLoaded: Boolean = false
-    private val investmentOutcomes: MutableMap<InvestmentOutcome, Int> = ConcurrentHashMap(2 * maxFundCount)
 
     @FXML
     lateinit var loadProgressBar: ProgressBar
     @FXML
     lateinit var fundContainer: VBox
 
+
+    private lateinit var mandatoryViewHolder: FundViewHolder
     @FXML
     lateinit var mandatoryFeeStartDate: DatePicker
     @FXML
@@ -56,8 +52,10 @@ class Controller : Initializable {
     @FXML
     lateinit var mandatoryPaymentRateMonitoringCheckBox: CheckBox
     @FXML
-    lateinit var buybackDatePicker: DatePicker
+    lateinit var mandatoryShowDiagramButton: Button
 
+
+    private lateinit var defaultCaseByCaseViewHolder: FundViewHolder
     @FXML
     lateinit var caseByCasePaymentStartDate: DatePicker
     @FXML
@@ -68,7 +66,13 @@ class Controller : Initializable {
     lateinit var caseByCaseAssetFundChoiceBox: ChoiceBox<AssetFund>
     @FXML
     lateinit var caseByCasePaymentRateMonitoringCheckBox: CheckBox
+    @FXML
+    lateinit var caseByCaseShowDiagramButton: Button
 
+
+    private lateinit var resultSummaryViewHolder: ResultSummaryViewHolder
+    @FXML
+    lateinit var buybackDatePicker: DatePicker
     @FXML
     lateinit var totalInpaymentsText: TextField
     @FXML
@@ -79,6 +83,7 @@ class Controller : Initializable {
     lateinit var totalYieldWithBuybackFeeText: TextField
     @FXML
     lateinit var totalBuybackFeeInForintsText: TextField
+
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         mandatoryFeeStartDate.dayCellFactory = Callback {
@@ -99,6 +104,13 @@ class Controller : Initializable {
                 monthlyPaymentText = caseByCasePaymentText,
                 assetFundChoiceBox = caseByCaseAssetFundChoiceBox,
                 paymentRateMonitoringCheckBox = caseByCasePaymentRateMonitoringCheckBox
+        )
+        mandatoryViewHolder = FundViewHolder(
+                paymentStartDate = mandatoryFeeStartDate,
+                paymentEndDate = mandatoryFeeEndDate,
+                monthlyPaymentText = mandatoryPaymentText,
+                assetFundChoiceBox = mandatoryFeeAssetFundChoiceBox,
+                paymentRateMonitoringCheckBox = mandatoryPaymentRateMonitoringCheckBox
         )
     }
 
@@ -132,14 +144,19 @@ class Controller : Initializable {
         }
     }
 
-    private fun fillChoiceBoxes(assetFundHolder: AssetFoundHolder) {
+    private fun fillChoiceBoxes(assetFundHolder: AssetFundHolder) {
         mandatoryFeeAssetFundChoiceBox.items.addAll(assetFundHolder.assetFunds)
         mandatoryFeeAssetFundChoiceBox.selectionModel.select(0)
+        mandatoryShowDiagramButton.isDisable = false
+
         caseByCaseAssetFundChoiceBox.items.addAll(assetFundHolder.assetFunds)
         caseByCaseAssetFundChoiceBox.selectionModel.select(0)
-        fundViewHolders.forEach { holder ->
+        caseByCaseShowDiagramButton.isDisable = false
+
+        addedFundViewHolders.forEach { holder ->
             holder.assetFundChoiceBox?.items?.addAll(assetFundHolder.assetFunds)
             holder.assetFundChoiceBox?.selectionModel?.select(0)
+            holder.showDiagramButton?.isDisable = false
         }
     }
 
@@ -148,7 +165,7 @@ class Controller : Initializable {
         if (fundCount < maxFundCount) {
             val builder = FundViewBuilder(fundContainer)
             val viewHolder = builder.build(assetFundHolder)
-            fundViewHolders.add(viewHolder)
+            addedFundViewHolders.add(viewHolder)
             fundCount++
         }
     }
@@ -158,7 +175,30 @@ class Controller : Initializable {
         if (dataAndInputIsInadequate()) {
             return
         }
-        tryToSimulate()
+        val simulator = SimulationController(
+                executor = executor,
+                maxFundCount = maxFundCount,
+                assetFundHolder = assetFundHolder as AssetFundHolder,
+                mandatoryViewHolder = mandatoryViewHolder,
+                addedFundViewHolders = addedFundViewHolders,
+                buybackDatePicker = buybackDatePicker,
+                defaultCaseByCaseViewHolder = defaultCaseByCaseViewHolder,
+                summaryHolder = resultSummaryViewHolder)
+        try {
+            simulator.tryToSimulate()
+        } catch (e: InvalidInputsException) {
+            // TODO: handle shit
+        }
+    }
+
+    @FXML
+    private fun onMandatoryShowDiagramClick(event: ActionEvent) {
+
+    }
+
+    @FXML
+    private fun onCaseByCaseShowDiagramClick(event: ActionEvent) {
+
     }
 
     private fun dataAndInputIsInadequate(): Boolean {
@@ -174,78 +214,10 @@ class Controller : Initializable {
             // TODO: handle shit
             return true
         }
+        if (!mandatoryViewHolder.dataIsFilled()) {
+            // TODO: handle shit
+            return true
+        }
         return false
-    }
-
-    private fun tryToSimulate() {
-        val safeAssetFund = (assetFundHolder as AssetFoundHolder).safeAssetFund
-        val calculatorList = initListByDefaultFundViewHolder(safeAssetFund)
-        addOtherFundViewHolders(calculatorList, safeAssetFund)
-        val simulatorTask = InvestmentSimulatorTask(calculatorList, maxFundCount)
-        simulatorTask.setOnSucceeded { showResultOnGui(simulatorTask.get()) }
-        executor.submit(simulatorTask)
-    }
-
-    private fun showResultOnGui(investmentOutcome: InvestmentOutcome) {
-        totalInpaymentsText.text = investmentOutcome.totalInpayedForints.toString()
-        totalForintsTookOutAfterFeeText.text = investmentOutcome.totalForintsTookOutAfterFee.toString()
-        totalMarginInForintsAfterFeeText.text = investmentOutcome.totalMarginInForintsAfterFee.toString()
-        totalYieldWithBuybackFeeText.text = investmentOutcome.totalYieldWithBuybackFee.toString()
-        totalBuybackFeeInForintsText.text = investmentOutcome.totalBuybackFeeInForints.toString()
-
-    }
-
-    private fun initListByDefaultFundViewHolder(safeAssetFund: AssetFund): MutableList<AssetFundCalculator> {
-        val calculatorList = ArrayList<AssetFundCalculator>()
-        if (defaultCaseByCaseViewHolder.dataIsFilled()) {
-            validateAndCollectCalculators(defaultCaseByCaseViewHolder, safeAssetFund, calculatorList)
-        }
-        return calculatorList
-    }
-
-    private fun validateAndCollectCalculators(filledViewHolder: FundViewHolder, safeAssetFund: AssetFund,
-                                              calculatorList: MutableList<AssetFundCalculator>) {
-        val assetFundData = filledViewHolder.getDataHolder()
-        val validator = assetFundData.getValidator(safeAssetFund, buybackDatePicker.value)
-        handleValidationResult(validator, calculatorList)
-    }
-
-    private fun addOtherFundViewHolders(calculatorList: MutableList<AssetFundCalculator>, safeAssetFund: AssetFund) {
-        fundViewHolders.forEach {
-            viewHolder ->
-            if (viewHolder.dataIsFilled()) {
-                validateAndCollectCalculators(viewHolder, safeAssetFund, calculatorList)
-            }
-        }
-    }
-
-    // TODO: handle shits
-    private fun handleValidationResult(validator: AssetFundValidator, calculatorList: MutableList<AssetFundCalculator>) {
-        when (validator.validate()) {
-            ValidationResult.VALID -> {
-                calculatorList.add(validator.getValidAssetFundCalculator())
-            }
-            ValidationResult.OUT_OF_RANGE_PAY_START_DATE -> {
-
-            }
-            ValidationResult.OUT_OF_RANGE_PAY_END_DATE -> {
-
-            }
-            ValidationResult.OUT_OF_RANGE_BUYBACK_DATE -> {
-
-            }
-            ValidationResult.START_LATER_THAN_END -> {
-
-            }
-            ValidationResult.START_LATER_THAN_BUYBACK -> {
-
-            }
-            ValidationResult.END_LATER_THAN_BUYBACK -> {
-
-            }
-            ValidationResult.UNVALIDATED -> {
-
-            }
-        }
     }
 }

@@ -1,7 +1,7 @@
 package com.attilapalfi.tools.viennacalculator.logic
 
 import com.attilapalfi.tools.viennacalculator.logic.implementations.AssetFundValidatorImpl
-import com.attilapalfi.tools.viennacalculator.model.AssetFoundHolder
+import com.attilapalfi.tools.viennacalculator.model.AssetFundHolder
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
 import com.attilapalfi.tools.viennacalculator.model.ValueEntry
 import org.junit.Assert
@@ -51,7 +51,7 @@ class NoAutoMonitoringTest : AbstractLogicTest() {
         Assert.assertEquals(36000, outcome.totalInpayedForints)
     }
 
-    private fun getZeroingAssetFundHolder(): AssetFoundHolder {
+    private fun getZeroingAssetFundHolder(): AssetFundHolder {
         val (valueHistory, safeValueHistory) = getInitialHistory()
         loadZeroingHistory(safeValueHistory, valueHistory)
         return assetFoundHolder(safeValueHistory, valueHistory)
@@ -71,13 +71,13 @@ class NoAutoMonitoringTest : AbstractLogicTest() {
         }
     }
 
-    private fun assetFoundHolder(safeValueHistory: TreeSet<ValueEntry>, valueHistory: TreeSet<ValueEntry>): AssetFoundHolder {
+    private fun assetFoundHolder(safeValueHistory: TreeSet<ValueEntry>, valueHistory: TreeSet<ValueEntry>): AssetFundHolder {
         val assetFund = AssetFund(assetFundName, valueHistory)
         val safeAssetFund = AssetFund(safeAssetFundName, safeValueHistory)
-        return AssetFoundHolder(listOf(assetFund), safeAssetFund)
+        return AssetFundHolder(listOf(assetFund), safeAssetFund)
     }
 
-    private fun getIncreasingAssetFundHolder(): AssetFoundHolder {
+    private fun getIncreasingAssetFundHolder(): AssetFundHolder {
         val (valueHistory, safeValueHistory) = getInitialHistory()
         loadIncreasingHistory(safeValueHistory, valueHistory)
         return assetFoundHolder(safeValueHistory, valueHistory)

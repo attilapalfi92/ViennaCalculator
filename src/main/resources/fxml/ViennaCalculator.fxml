@@ -16,7 +16,6 @@
         <Button onAction="#onLoadHistoricalData" text="Historikus adatok tallózása"/>
         <ProgressBar fx:id="loadProgressBar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
                      progress="0" HBox.hgrow="ALWAYS"/>
-        <Button text="Árfolyamtörténet megtekintése"/>
     </HBox>
 
     <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="10" VBox.vgrow="ALWAYS">
@@ -33,8 +32,9 @@
                         <TextField promptText="Havi befizetés" fx:id="mandatoryPaymentText"/>
                         <Label text="Eszközalap választás"/>
                         <ChoiceBox fx:id="mandatoryFeeAssetFundChoiceBox"/>
+                        <Button text="Diagram megtekintése" fx:id="mandatoryShowDiagramButton"
+                                onAction="#onMandatoryShowDiagramClick" disable="true"/>
                         <CheckBox text="Automatikus árfolyamfigyelés" fx:id="mandatoryPaymentRateMonitoringCheckBox"/>
-                        <Button text="Egyedi eredmények megtekintése" disable="true"/>
                     </VBox>
                 </content>
             </TitledPane>
@@ -97,9 +97,10 @@
                                         <TextField promptText="Havi befizetés" fx:id="caseByCasePaymentText"/>
                                         <Label text="Eszközalap választás"/>
                                         <ChoiceBox fx:id="caseByCaseAssetFundChoiceBox"/>
+                                        <Button text="Diagram megtekintése" fx:id="caseByCaseShowDiagramButton"
+                                                onAction="#onCaseByCaseShowDiagramClick" disable="true"/>
                                         <CheckBox text="Automatikus árfolyamfigyelés"
                                                   fx:id="caseByCasePaymentRateMonitoringCheckBox"/>
-                                        <Button text="Egyedi eredmények megtekintése" disable="true"/>
                                     </VBox>
                                 </content>
                             </TitledPane>

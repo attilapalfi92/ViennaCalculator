@@ -1,6 +1,6 @@
 package com.attilapalfi.tools.viennacalculator.logic
 
-import com.attilapalfi.tools.viennacalculator.model.AssetFoundHolder
+import com.attilapalfi.tools.viennacalculator.model.AssetFundHolder
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
 import com.attilapalfi.tools.viennacalculator.model.ValueEntry
 import javafx.concurrent.Task
@@ -19,7 +19,7 @@ import java.util.*
 /**
  * Created by palfi on 2016-02-20.
  */
-class XlsLoaderTask(private val sourceFile: File) : Task<AssetFoundHolder>() {
+class XlsLoaderTask(private val sourceFile: File) : Task<AssetFundHolder>() {
 
     private val safeAssetFundName = "Pénzpiaci forint"
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
@@ -28,14 +28,14 @@ class XlsLoaderTask(private val sourceFile: File) : Task<AssetFoundHolder>() {
     private val assetFunds: MutableList<AssetFund> = ArrayList()
     private var safeAssetFund: AssetFund? = null
 
-    private lateinit var resultHolder: AssetFoundHolder
+    private lateinit var resultHolder: AssetFundHolder
 
-    override fun call(): AssetFoundHolder {
+    override fun call(): AssetFundHolder {
         val start = System.currentTimeMillis()
         doLoad()
         println(System.currentTimeMillis() - start)
         safeAssetFund?.let {
-            resultHolder = AssetFoundHolder(assetFunds, it)
+            resultHolder = AssetFundHolder(assetFunds, it)
             succeeded()
             return resultHolder
         }

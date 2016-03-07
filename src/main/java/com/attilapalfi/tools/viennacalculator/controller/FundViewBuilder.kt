@@ -1,6 +1,6 @@
 package com.attilapalfi.tools.viennacalculator.controller
 
-import com.attilapalfi.tools.viennacalculator.model.AssetFoundHolder
+import com.attilapalfi.tools.viennacalculator.model.AssetFundHolder
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
 import com.attilapalfi.tools.viennacalculator.view.FundViewHolder
 import com.attilapalfi.tools.viennacalculator.view.RestrictingDateCell
@@ -18,7 +18,7 @@ class FundViewBuilder(val fundContainer: VBox) {
 
     private val fundViewHolder = FundViewHolder()
 
-    fun build(assetFundHolder: AssetFoundHolder?): FundViewHolder {
+    fun build(assetFundHolder: AssetFundHolder?): FundViewHolder {
         val titledPane = getTitledPane()
         fundContainer.add(titledPane)
         val vBox = getVBox(titledPane)
@@ -26,8 +26,8 @@ class FundViewBuilder(val fundContainer: VBox) {
         addHBoxToVBox(vBox, choiceBox)
         addMonthlyPaymentText(vBox)
         addLabelAndChoiceBox(choiceBox, vBox, assetFundHolder)
+        addDiagramButton(vBox, assetFundHolder)
         addCheckBox(vBox)
-        addResultsButton(vBox)
         addRemoveButton(vBox)
         return fundViewHolder
     }
@@ -85,7 +85,7 @@ class FundViewBuilder(val fundContainer: VBox) {
         vBox.add(textField)
     }
 
-    private fun addLabelAndChoiceBox(choiceBox: ChoiceBox<AssetFund>, vBox: VBox, assetFundHolder: AssetFoundHolder?) {
+    private fun addLabelAndChoiceBox(choiceBox: ChoiceBox<AssetFund>, vBox: VBox, assetFundHolder: AssetFundHolder?) {
         val label = Label("Eszközalap választás")
         vBox.add(label)
         assetFundHolder?.let {
@@ -96,17 +96,17 @@ class FundViewBuilder(val fundContainer: VBox) {
         vBox.add(choiceBox)
     }
 
+    private fun addDiagramButton(vBox: VBox, assetFundHolder: AssetFundHolder?) {
+        val diagramButton = Button("Diagram megtekintése")
+        diagramButton.isDisable = assetFundHolder == null
+        fundViewHolder.showDiagramButton = diagramButton
+        vBox.add(diagramButton)
+    }
+
     private fun addCheckBox(vBox: VBox) {
         val checkBox = CheckBox("Automatikus árfolyamfigyelés")
         fundViewHolder.paymentRateMonitoringCheckBox = checkBox
         vBox.add(checkBox)
-    }
-
-    private fun addResultsButton(vBox: VBox) {
-        val resultsButton = Button("Egyedi eredmények megtekintése")
-        resultsButton.isDisable = true
-        fundViewHolder.individualResultsButton = resultsButton
-        vBox.add(resultsButton)
     }
 
     private fun addRemoveButton(vBox: VBox) {
