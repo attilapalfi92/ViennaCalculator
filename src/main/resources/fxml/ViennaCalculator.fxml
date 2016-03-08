@@ -49,23 +49,23 @@
                     <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="10">
                         <VBox>
                             <Label text="Összes befizetés"/>
-                            <TextField disable="true" fx:id="totalInpaymentsText"/>
+                            <TextField editable="false" fx:id="totalInpaymentsText"/>
                         </VBox>
                         <VBox>
                             <Label text="Végén kivett pénz"/>
-                            <TextField disable="true" fx:id="totalForintsTookOutAfterFeeText"/>
+                            <TextField editable="false" fx:id="totalForintsTookOutAfterFeeText"/>
                         </VBox>
                         <VBox>
                             <Label text="Különbözet"/>
-                            <TextField disable="true" fx:id="totalMarginInForintsAfterFeeText"/>
+                            <TextField editable="false" fx:id="totalMarginInForintsAfterFeeText"/>
                         </VBox>
                         <VBox>
                             <Label text="Teljes hozam"/>
-                            <TextField disable="true" fx:id="totalYieldWithBuybackFeeText"/>
+                            <TextField editable="false" fx:id="totalYieldWithBuybackFeeText"/>
                         </VBox>
                         <VBox>
                             <Label text="Visszavásárlási díj"/>
-                            <TextField disable="true" fx:id="totalBuybackFeeInForintsText"/>
+                            <TextField editable="false" fx:id="totalBuybackFeeInForintsText"/>
                         </VBox>
                     </VBox>
                 </content>
