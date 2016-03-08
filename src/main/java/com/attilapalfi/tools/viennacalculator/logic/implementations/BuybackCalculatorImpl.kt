@@ -10,14 +10,14 @@ import java.util.*
 /**
  * Created by 212461305 on 2016.02.22..
  */
-class BuybackCalculatorImpl(private val inpayments: TreeMap<LocalDate, Inpayment>, val lastDay: LocalDate,
+class BuybackCalculatorImpl(private val inpayments: TreeMap<LocalDate, Inpayment>, val buybackDay: LocalDate,
                             val lastDaysValue: ValueEntry, val lastDaysSafeValue: ValueEntry,
                             val moneyInSafeAsset: Boolean) : BuybackCalculator {
 
     val publishedInpayments: Map<LocalDate, Inpayment> = inpayments
 
-    val twoPercentBorderDay = lastDay.minusYears(1)
-    val onePercentBorderDay = lastDay.minusYears(2)
+    val twoPercentBorderDay = buybackDay.minusYears(1)
+    val onePercentBorderDay = buybackDay.minusYears(2)
 
     var totalInpayedForints: Int = 0
     var totalForintsTookOut: Double = 0.0

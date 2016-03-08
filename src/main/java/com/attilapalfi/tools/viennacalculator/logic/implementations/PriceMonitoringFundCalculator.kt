@@ -24,36 +24,58 @@ class PriceMonitoringFundCalculator(assetFund: AssetFund, safeAssetFund: AssetFu
     } else {
         payStartDate.dayOfMonth
     }
+    val payMonthQuarter: Int = (inpaymentDays - 1) / 7;
     private var moneyInSafeAsset: Boolean = false
     private val inpayments = TreeMap<LocalDate, Inpayment>()
 
     private val trimmedAssetFund: List<ValueEntry>
-            by lazy { assetFund.valueHistory.filter { it.date >= payStartDate && it.date <= buybackDate }.sorted() }
+            by lazy {
+                if (autoPriceMonitoring) {
+                    assetFund.valueHistory.filter {
+                        it.date >= payStartDate && it.date <= buybackDate
+                                && Collections.binarySearch<LocalDate>(
+                                safeAssetFund.valueHistory.map { it.date }, it.date) >= 0
+                    }.sorted()
+                } else {
+                    assetFund.valueHistory.filter { it.date >= payStartDate && it.date <= buybackDate }.sorted()
+                }
+            }
 
     private val trimmedSafeAssetFund: List<ValueEntry>
-            by lazy { safeAssetFund.valueHistory.filter { it.date >= payStartDate && it.date <= buybackDate }.sorted() }
+            by lazy {
+                safeAssetFund.valueHistory.filter {
+                    it.date >= payStartDate && it.date <= buybackDate
+                            && Collections.binarySearch<LocalDate>(
+                            assetFund.valueHistory.map { it.date }, it.date) >= 0
+                }.sorted()
+            }
 
     private var todaysValue: ValueEntry = ValueEntry(LocalDate.MIN, Double.MIN_VALUE)
     private var todaysSafeValue: ValueEntry = ValueEntry(LocalDate.MIN, Double.MIN_VALUE)
     private var today: LocalDate = payStartDate
 
+    private var payedThisMonth: Boolean = false;
+    private var previousMonth: Int = 0
+    private var previousYear: Int = 0
+
     override fun getBuybackCalculator(): BuybackCalculator {
         clear()
-        doFirstInpayment(monthlyPayment)
-        for (dayIndex in 1..trimmedAssetFund.size - 1) {
-            simulateDay(dayIndex, monthlyPayment)
+        //doFirstInpayment()
+        trimmedAssetFund.forEachIndexed { i, valueEntry ->
+            today = valueEntry.date
+            simulateDay(i)
         }
+        // TODO: weekends are not in the list!!!!!!!! HANDLE SHIIIIT! AAAAAARGGHH
         return BuybackCalculatorImpl(inpayments, buybackDate, todaysValue, todaysSafeValue, moneyInSafeAsset)
     }
 
-    private fun simulateDay(dayIndex: Int, monthlyPayment: Int) {
-        today = today.plusDays(1)
+    private fun simulateDay(dayIndex: Int) {
         todaysValue = trimmedAssetFund[dayIndex]
         if (autoPriceMonitoring) {
             todaysSafeValue = trimmedSafeAssetFund[dayIndex]
             moveFundsIfNeeded()
         }
-        doInpaymentIfNeeded(monthlyPayment)
+        doInpaymentIfNeeded()
     }
 
     override fun clear() {
@@ -62,7 +84,7 @@ class PriceMonitoringFundCalculator(assetFund: AssetFund, safeAssetFund: AssetFu
         inpayments.clear()
     }
 
-    private fun doFirstInpayment(monthlyPayment: Int) {
+    private fun doFirstInpayment() {
         var valueEntry = trimmedAssetFund.first()
         inpayments.put(valueEntry.date, Inpayment(valueEntry.date, monthlyPayment,
                 monthlyPayment / valueEntry.value, assetFund))
@@ -112,17 +134,30 @@ class PriceMonitoringFundCalculator(assetFund: AssetFund, safeAssetFund: AssetFu
         }
     }
 
-    private fun doInpaymentIfNeeded(monthlyPayment: Int) {
-        if (today < payEndDate) {
-            if (today.dayOfMonth == inpaymentDays) {
-                if (!moneyInSafeAsset) {
-                    inpayments.put(today, Inpayment(today, monthlyPayment,
-                            monthlyPayment / todaysValue.value, assetFund))
-                } else {
-                    inpayments.put(today, Inpayment(today, monthlyPayment,
-                            monthlyPayment / todaysSafeValue.value, safeAssetFund))
-                }
+    private fun doInpaymentIfNeeded() {
+        if (today.year > previousYear) {
+            previousMonth = 0
+            previousYear = today.year
+        }
+        if (today.monthValue > previousMonth) {
+            payedThisMonth = false
+            previousMonth = today.monthValue
+        }
+        if ((today.dayOfMonth - 1) / 7 == payMonthQuarter) {
+            if (!payedThisMonth) {
+                doActualPayment()
+                payedThisMonth = true
             }
+        }
+    }
+
+    private fun doActualPayment() {
+        if (!moneyInSafeAsset) {
+            inpayments.put(today, Inpayment(today, monthlyPayment,
+                    monthlyPayment / todaysValue.value, assetFund))
+        } else {
+            inpayments.put(today, Inpayment(today, monthlyPayment,
+                    monthlyPayment / todaysSafeValue.value, safeAssetFund))
         }
     }
 

@@ -39,7 +39,7 @@ class SimulationController(private val executor: ExecutorService,
     private fun initListWithMandatoryViewHolder(safeAssetFund: AssetFund): MutableList<AssetFundCalculator> {
         val calculatorList = ArrayList<AssetFundCalculator>()
         if (mandatoryViewHolder.dataIsFilled()) {
-            validateAndCollectCalculators(defaultCaseByCaseViewHolder, safeAssetFund, calculatorList)
+            validateAndCollectCalculators(mandatoryViewHolder, safeAssetFund, calculatorList)
         } else {
             throw InvalidInputsException()
         }

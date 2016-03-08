@@ -1,10 +1,13 @@
 package com.attilapalfi.tools.viennacalculator.view
 
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
+import javafx.scene.Node
 import javafx.scene.Scene
-import javafx.scene.chart.LineChart
+import javafx.scene.chart.AreaChart
+import javafx.scene.chart.CategoryAxis
 import javafx.scene.chart.NumberAxis
 import javafx.scene.chart.XYChart
+import javafx.scene.paint.Color
 import javafx.stage.Stage
 
 /**
@@ -13,24 +16,53 @@ import javafx.stage.Stage
 object AssetFundChartView {
 
     fun show(assetFund: AssetFund) {
-        val xAxis = NumberAxis().apply { label = "Napok" }
-        val yAxis = NumberAxis().apply { label = "Érték" }
-
-        val chart = LineChart<Number, Number>(xAxis, yAxis).apply { setTitle(assetFund.name) }
-        val series = XYChart.Series<Number, Number>().apply { setName(assetFund.name) }
-
-        assetFund.valueHistory.forEachIndexed { i, valueEntry ->
-            series.data.add(XYChart.Data(i, valueEntry.value))
-        }
-
+        val chart = getChart(assetFund)
+        val series = getSeries(assetFund)
         chart.data.add(series)
-        chart.createSymbols = false
-        val scene = Scene(chart)//, 800.0, 600.0)
+        showStage(assetFund, chart)
+    }
 
+    private fun getChart(assetFund: AssetFund): AreaChart<String, Number> {
+        val xAxis = CategoryAxis().apply { label = "Napok" }
+        val yAxis = NumberAxis().apply { label = "Érték" }
+        val chart = AreaChart<String, Number>(xAxis, yAxis)
+                .apply { title = assetFund.name; createSymbols = false }
+        return chart
+    }
+
+    private fun getSeries(assetFund: AssetFund): XYChart.Series<String, Number> {
+        val series = XYChart.Series<String, Number>().apply { name = assetFund.name }
+        setColor(series)
+        assetFund.valueHistory.forEach {
+            series.data.add(XYChart.Data(it.date.toString(), it.value))
+        }
+        return series
+    }
+
+    private fun setColor(series: XYChart.Series<String, Number>) {
+        //setLineColor(series)
+        //setFillColor(series)
+    }
+
+    private fun setLineColor(series: XYChart.Series<String, Number>) {
+        val line: Node = series.node.lookup(".chart-series-area-line")
+        val lineColor = colorToString(Color.AZURE)
+        line.style = "-fx-stroke: rgba($lineColor, 1.0);"
+    }
+
+    private fun setFillColor(series: XYChart.Series<String, Number>) {
+        val fill: Node = series.node.lookup(".chart-series-area-fill")
+        val fillColor = colorToString(Color.AQUA)
+        fill.style = "-fx-fill: rgba($fillColor, 0.15);";
+    }
+
+    private fun colorToString(color: Color): String
+            = "${color.red * 255}, ${color.green * 255}, ${color.blue * 255}"
+
+    private fun showStage(assetFund: AssetFund, chart: AreaChart<String, Number>) {
         val stage = Stage()
         stage.title = "${assetFund.name} diagram"
-        stage.scene = scene
-
+        stage.scene = Scene(chart)
         stage.show()
     }
 }

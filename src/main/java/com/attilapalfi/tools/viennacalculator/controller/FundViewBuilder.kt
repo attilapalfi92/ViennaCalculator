@@ -1,15 +1,16 @@
 package com.attilapalfi.tools.viennacalculator.controller
 
-import com.attilapalfi.tools.viennacalculator.model.AssetFundHolder
 import com.attilapalfi.tools.viennacalculator.model.AssetFund
+import com.attilapalfi.tools.viennacalculator.model.AssetFundHolder
+import com.attilapalfi.tools.viennacalculator.view.AssetFundChartView
 import com.attilapalfi.tools.viennacalculator.view.FundViewHolder
 import com.attilapalfi.tools.viennacalculator.view.RestrictingDateCell
+import javafx.event.EventHandler
 import javafx.scene.control.*
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.util.Callback
 import tornadofx.add
-import tornadofx.addTo
 
 /**
  * Created by palfi on 2016-02-28.
@@ -26,7 +27,7 @@ class FundViewBuilder(val fundContainer: VBox) {
         addHBoxToVBox(vBox, choiceBox)
         addMonthlyPaymentText(vBox)
         addLabelAndChoiceBox(choiceBox, vBox, assetFundHolder)
-        addDiagramButton(vBox, assetFundHolder)
+        addDiagramButton(vBox, assetFundHolder, choiceBox)
         addCheckBox(vBox)
         addRemoveButton(vBox)
         return fundViewHolder
@@ -54,7 +55,9 @@ class FundViewBuilder(val fundContainer: VBox) {
         hBox.spacing = 5.0
         addPaymentStart(hBox, choiceBox)
         addPaymentEnd(hBox, choiceBox)
-        hBox.addTo(vBox)
+        //        hBox.addTo(vBox)
+        //        vBox.add(hBox)
+        vBox.children.add(hBox)
         return hBox
     }
 
@@ -96,9 +99,16 @@ class FundViewBuilder(val fundContainer: VBox) {
         vBox.add(choiceBox)
     }
 
-    private fun addDiagramButton(vBox: VBox, assetFundHolder: AssetFundHolder?) {
+    private fun addDiagramButton(vBox: VBox, assetFundHolder: AssetFundHolder?, choiceBox: ChoiceBox<AssetFund>) {
         val diagramButton = Button("Diagram megtekintése")
         diagramButton.isDisable = assetFundHolder == null
+        diagramButton.onAction = EventHandler {
+            if ( choiceBox.value != null ) {
+                AssetFundChartView.show(choiceBox.value)
+            } else {
+                // TODO: handle shit
+            }
+        }
         fundViewHolder.showDiagramButton = diagramButton
         vBox.add(diagramButton)
     }

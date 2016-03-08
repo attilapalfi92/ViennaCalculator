@@ -113,6 +113,13 @@ class Controller : Initializable {
                 assetFundChoiceBox = mandatoryFeeAssetFundChoiceBox,
                 paymentRateMonitoringCheckBox = mandatoryPaymentRateMonitoringCheckBox
         )
+        resultSummaryViewHolder = ResultSummaryViewHolder(
+                totalInpaymentsText = totalInpaymentsText,
+                totalBuybackFeeInForintsText = totalBuybackFeeInForintsText,
+                totalForintsTookOutAfterFeeText = totalForintsTookOutAfterFeeText,
+                totalMarginInForintsAfterFeeText = totalMarginInForintsAfterFeeText,
+                totalYieldWithBuybackFeeText = totalYieldWithBuybackFeeText
+        )
     }
 
     @FXML
@@ -194,16 +201,20 @@ class Controller : Initializable {
 
     @FXML
     private fun onMandatoryShowDiagramClick(event: ActionEvent) {
-        if ( mandatoryFeeAssetFundChoiceBox.value != null ) {
-            AssetFundChartView.show(mandatoryFeeAssetFundChoiceBox.value)
-        } else {
-            // error
-        }
+        showDiagram(mandatoryFeeAssetFundChoiceBox)
     }
 
     @FXML
     private fun onCaseByCaseShowDiagramClick(event: ActionEvent) {
+        showDiagram(caseByCaseAssetFundChoiceBox)
+    }
 
+    private fun showDiagram(choiceBox: ChoiceBox<AssetFund>) {
+        if ( choiceBox.value != null ) {
+            AssetFundChartView.show(choiceBox.value)
+        } else {
+            // TODO: handle shit
+        }
     }
 
     private fun dataAndInputIsInadequate(): Boolean {
