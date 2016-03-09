@@ -10,7 +10,6 @@ import javafx.scene.control.*
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.util.Callback
-import tornadofx.add
 
 /**
  * Created by palfi on 2016-02-28.
@@ -21,7 +20,7 @@ class FundViewBuilder(val fundContainer: VBox) {
 
     fun build(assetFundHolder: AssetFundHolder?): FundViewHolder {
         val titledPane = getTitledPane()
-        fundContainer.add(titledPane)
+        fundContainer.children.add(titledPane)
         val vBox = getVBox(titledPane)
         val choiceBox = ChoiceBox<AssetFund>()
         addHBoxToVBox(vBox, choiceBox)
@@ -29,7 +28,7 @@ class FundViewBuilder(val fundContainer: VBox) {
         addLabelAndChoiceBox(choiceBox, vBox, assetFundHolder)
         addDiagramButton(vBox, assetFundHolder, choiceBox)
         addCheckBox(vBox)
-        addRemoveButton(vBox)
+        addRemoveButton(vBox, fundContainer, titledPane)
         return fundViewHolder
     }
 
@@ -55,8 +54,6 @@ class FundViewBuilder(val fundContainer: VBox) {
         hBox.spacing = 5.0
         addPaymentStart(hBox, choiceBox)
         addPaymentEnd(hBox, choiceBox)
-        //        hBox.addTo(vBox)
-        //        vBox.add(hBox)
         vBox.children.add(hBox)
         return hBox
     }
@@ -68,7 +65,7 @@ class FundViewBuilder(val fundContainer: VBox) {
         }
         paymentStart.promptText = "Befizetés kezdete"
         fundViewHolder.paymentStartDate = paymentStart
-        hBox.add(paymentStart)
+        hBox.children.add(paymentStart)
     }
 
     private fun addPaymentEnd(hBox: HBox, choiceBox: ChoiceBox<AssetFund>) {
@@ -78,50 +75,47 @@ class FundViewBuilder(val fundContainer: VBox) {
         }
         paymentEnd.promptText = "Befizetés vége"
         fundViewHolder.paymentEndDate = paymentEnd
-        hBox.add(paymentEnd)
+        hBox.children.add(paymentEnd)
     }
 
     private fun addMonthlyPaymentText(vBox: VBox) {
         val textField = TextField()
         textField.promptText = "Havi befizetés"
         fundViewHolder.monthlyPaymentText = textField
-        vBox.add(textField)
+        vBox.children.add(textField)
     }
 
     private fun addLabelAndChoiceBox(choiceBox: ChoiceBox<AssetFund>, vBox: VBox, assetFundHolder: AssetFundHolder?) {
         val label = Label("Eszközalap választás")
-        vBox.add(label)
+        vBox.children.add(label)
         assetFundHolder?.let {
             choiceBox.items.addAll(it.assetFunds)
             choiceBox.selectionModel.select(0)
         }
         fundViewHolder.assetFundChoiceBox = choiceBox
-        vBox.add(choiceBox)
+        vBox.children.add(choiceBox)
     }
 
     private fun addDiagramButton(vBox: VBox, assetFundHolder: AssetFundHolder?, choiceBox: ChoiceBox<AssetFund>) {
         val diagramButton = Button("Diagram megtekintése")
         diagramButton.isDisable = assetFundHolder == null
-        diagramButton.onAction = EventHandler {
-            if ( choiceBox.value != null ) {
-                AssetFundChartView.show(choiceBox.value)
-            } else {
-                // TODO: handle shit
-            }
-        }
+        diagramButton.onAction = EventHandler { AssetFundChartView.show(choiceBox.value) }
         fundViewHolder.showDiagramButton = diagramButton
-        vBox.add(diagramButton)
+        vBox.children.add(diagramButton)
     }
 
     private fun addCheckBox(vBox: VBox) {
         val checkBox = CheckBox("Automatikus árfolyamfigyelés")
         fundViewHolder.paymentRateMonitoringCheckBox = checkBox
-        vBox.add(checkBox)
+        vBox.children.add(checkBox)
     }
 
-    private fun addRemoveButton(vBox: VBox) {
+    private fun addRemoveButton(vBox: VBox, fundContainer: VBox, titledPane: TitledPane) {
         val removeButton = Button("Eltávolítás")
+        removeButton.onAction = EventHandler {
+            fundContainer.children.remove(titledPane)
+        }
         fundViewHolder.removeButton = removeButton
-        vBox.add(removeButton)
+        vBox.children.add(removeButton)
     }
 }

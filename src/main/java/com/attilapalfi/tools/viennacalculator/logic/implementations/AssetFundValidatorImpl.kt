@@ -1,7 +1,6 @@
 package com.attilapalfi.tools.viennacalculator.logic.implementations
 
 import com.attilapalfi.tools.viennacalculator.exception.InvalidAssetFundException
-import com.attilapalfi.tools.viennacalculator.logic.AbstractAssetFundWorker
 import com.attilapalfi.tools.viennacalculator.logic.AssetFundCalculator
 import com.attilapalfi.tools.viennacalculator.logic.validation.AssetFundValidator
 import com.attilapalfi.tools.viennacalculator.logic.validation.ValidationResult
@@ -13,8 +12,8 @@ import java.time.LocalDate
  */
 class AssetFundValidatorImpl(assetFund: AssetFund, safeAssetFund: AssetFund, payStartDate: LocalDate,
                              payEndDate: LocalDate, buybackDate: LocalDate, autoPriceMonitoring: Boolean,
-                             monthlyPayment: Int, customPayments: Map<LocalDate, Int>) : AssetFundValidator,
-        AbstractAssetFundWorker(assetFund, safeAssetFund, payStartDate, payEndDate,
+                             monthlyPayment: Int, customPayments: Map<LocalDate, Int>) :
+        AssetFundValidator(assetFund, safeAssetFund, payStartDate, payEndDate,
                 buybackDate, autoPriceMonitoring, monthlyPayment, customPayments) {
 
     private var lastValidationResult: ValidationResult = ValidationResult.UNVALIDATED

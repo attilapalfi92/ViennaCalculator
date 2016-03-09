@@ -195,45 +195,65 @@ class Controller : Initializable {
         try {
             simulator.tryToSimulate()
         } catch (e: InvalidInputsException) {
-            // TODO: handle shit
+            showMandatoryViewError()
         }
     }
 
     @FXML
     private fun onMandatoryShowDiagramClick(event: ActionEvent) {
-        showDiagram(mandatoryFeeAssetFundChoiceBox)
+        AssetFundChartView.show(mandatoryFeeAssetFundChoiceBox.value)
     }
 
     @FXML
     private fun onCaseByCaseShowDiagramClick(event: ActionEvent) {
-        showDiagram(caseByCaseAssetFundChoiceBox)
-    }
-
-    private fun showDiagram(choiceBox: ChoiceBox<AssetFund>) {
-        if ( choiceBox.value != null ) {
-            AssetFundChartView.show(choiceBox.value)
-        } else {
-            // TODO: handle shit
-        }
+        AssetFundChartView.show(caseByCaseAssetFundChoiceBox.value)
     }
 
     private fun dataAndInputIsInadequate(): Boolean {
         if (!dataIsLoaded) {
-            // TODO: handle shit
+            showDataFileError()
             return true
         }
         if (buybackDatePicker.value == null) {
-            // TODO: handle shit
+            showBuybackDateError()
             return true
         }
         if (assetFundHolder == null) {
-            // TODO: handle shit
+            showDataFileError()
             return true
         }
         if (!mandatoryViewHolder.dataIsFilled()) {
-            // TODO: handle shit
+            showMandatoryViewError()
             return true
         }
         return false
+    }
+
+    private fun showDataFileError() {
+        val alert = Alert(Alert.AlertType.ERROR).apply {
+            title = "Adatfájl hiba";
+            headerText = "Adatfájl nincs betöltve."
+            contentText = "Töltse be a az alábbi URL-ről letölthető xls fájlt:\n" +
+                    "https://www.viennalife.hu/static/historical.xls"
+        }
+        alert.showAndWait()
+    }
+
+    private fun showBuybackDateError() {
+        val alert = Alert(Alert.AlertType.ERROR).apply {
+            title = "Hibás visszavásárlási idő";
+            headerText = "Hibás visszavásárlási idő."
+            contentText = "Állítson be visszavásárlási időpontot."
+        }
+        alert.showAndWait()
+    }
+
+    private fun showMandatoryViewError() {
+        val alert = Alert(Alert.AlertType.ERROR).apply {
+            title = "Hiányos kötelező havidíj";
+            headerText = "Hiányos kötelező havidíj."
+            contentText = "Töltse ki a kötelező havidíj rész mezőit."
+        }
+        alert.showAndWait()
     }
 }

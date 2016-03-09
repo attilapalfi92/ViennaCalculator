@@ -7,6 +7,7 @@ import javafx.scene.chart.AreaChart
 import javafx.scene.chart.CategoryAxis
 import javafx.scene.chart.NumberAxis
 import javafx.scene.chart.XYChart
+import javafx.scene.control.Tooltip
 import javafx.scene.paint.Color
 import javafx.stage.Stage
 
@@ -15,11 +16,15 @@ import javafx.stage.Stage
  */
 object AssetFundChartView {
 
-    fun show(assetFund: AssetFund) {
-        val chart = getChart(assetFund)
-        val series = getSeries(assetFund)
-        chart.data.add(series)
-        showStage(assetFund, chart)
+    fun show(assetFund: AssetFund?) {
+        if (assetFund != null) {
+            val chart = getChart(assetFund)
+            val series = getSeries(assetFund)
+            chart.data.add(series)
+            showStage(assetFund, chart)
+        } else {
+            // TODO: HANDLE SHIT
+        }
     }
 
     private fun getChart(assetFund: AssetFund): AreaChart<String, Number> {
@@ -34,7 +39,9 @@ object AssetFundChartView {
         val series = XYChart.Series<String, Number>().apply { name = assetFund.name }
         setColor(series)
         assetFund.valueHistory.forEach {
-            series.data.add(XYChart.Data(it.date.toString(), it.value))
+            val data = XYChart.Data(it.date.toString(), it.value as Number)
+            series.data.add(data)
+            Tooltip.install(data.node, Tooltip("${data.yValue}\n${data.xValue}"))
         }
         return series
     }
